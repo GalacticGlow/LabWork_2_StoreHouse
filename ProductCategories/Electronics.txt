@@ -1,4 +1,2 @@
-Laptop Pro | High-end Gaming Laptop | MSI | 8 | 1899.99
-Laptop Pro | High-end Gaming Laptop | MSI | 8 | 1899.99
-Laptop Pro | High-end Gaming Laptop | MSI | 8 | 1899.99
-Laptop Pro | High-end Gaming Laptop | MSI | 8 | 1899.99
+Laptop | Gaming Laptop | MSI | 10 | 1499.99
+TV | TV | TV | 10 | 1999.99
