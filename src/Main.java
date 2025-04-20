@@ -364,7 +364,6 @@ public class Main {
     public static void main(String[] args) {
     loadAllData();
 
-<<<<<<< HEAD
     JFrame frame = new JFrame("Add Product");
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setSize(400, 300);
@@ -416,7 +415,6 @@ public class Main {
     });
 
     frame.setVisible(true);
-=======
         /*Category electronics = new Category("Electronics", "Electronics");
         addCategory(electronics);
         Category books = new Category("Books", "jsadklfjas;dlkfj");
@@ -437,10 +435,7 @@ public class Main {
         Product TV = new Product("TV", "TV", "TV", 10, 1999.99);
         addProduct(TV, electronics);
 
-
-
         System.out.println(printAllProducts());
         System.out.println(printAllProductsByCategory());
->>>>>>> ca6797e320f6c20809261dcc79ed281fb59b0add
     }
 }

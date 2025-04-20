@@ -1,9 +1,1 @@
-<<<<<<< HEAD
-Fish | jfasdf
-Meat | hfasdlfjhasdkfhas
-Furit | fsdafasfsdf
-=======
-Electronics | Electronics
-Books | jsadklfjas;dlkfj
 Food | Food
->>>>>>> ca6797e320f6c20809261dcc79ed281fb59b0add
