@@ -226,6 +226,22 @@ public class Main {
         }
         return list;
     }
+    public static ArrayList<Product> searchForProducts(String searchText) {
+        ArrayList<Product> foundProducts = new ArrayList<>();
+        String searchPattern = searchText.toLowerCase();
+
+        for (Category category : categories) {
+            for (Product product : category.getProducts()) {
+                if (product.getName().toLowerCase().contains(searchPattern)
+                        || product.getDescription().toLowerCase().contains(searchPattern)
+                        || product.getProducer().toLowerCase().contains(searchPattern)) {
+                    foundProducts.add(product);
+                }
+            }
+        }
+        return foundProducts;
+    }
+
 
     public static void main(String[] args) {
         loadAllData();
