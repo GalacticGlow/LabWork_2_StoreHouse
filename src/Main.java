@@ -7,6 +7,10 @@ import javax.swing.*;
 public class Main {
     static ArrayList<Category> categories = new ArrayList<>();
     private static final String options = "Enter 0 to change name; Enter 1 to add; Enter 2 to update; Enter 3 to delete; Enter 4 to exit";
+    private static final char[] bilingualAlphabet = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
+            'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'А', 'Б', 'В', 'Г', 'Ґ', 'Д', 'Е', 'Є', 'Ж', 'З', 'И', 'І', 'Ї', 'Й',
+            'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц', 'Ч',
+            'Ш', 'Щ', 'Ь', 'Ю', 'Я'};
 
     public static boolean contains(String[] arr, String target) {
         for (String str : arr) {
@@ -269,10 +273,98 @@ public class Main {
         }
         return foundProducts;
     }
+    public static String printAllProducts(){
+        StringBuilder sb = new StringBuilder();
+        ArrayList<Product> products = new ArrayList<>();
+
+        for (Category category : categories) {
+            products.addAll(category.getProducts());
+        }
+        products.sort((p1, p2) -> {
+            String o1 = p1.getName();
+            String o2 = p2.getName();
+
+            int len = Math.min(o1.length(), o2.length());
+
+            for (int i = 0; i < len; i++) {
+                if (getCharIndex(o1.charAt(i)) != getCharIndex(o2.charAt(i))) {
+                    return getCharIndex(o1.charAt(i)) - getCharIndex(o2.charAt(i));
+                }
+            }
+            return o1.length() - o2.length();
+        });
+        sb.append("All ").append(products.size()).append(" products: \n");
+        for (Product product : products) {
+            sb.append(product.toString()).append(" | Full price in stock: ").append(product.getFullPrice()).append("\n");
+        }
+        return sb.toString();
+
+    }
+
+    public static String printAllProductsByCategory() {
+        StringBuilder sb = new StringBuilder();
+        ArrayList<Category> categoriesSorted = new ArrayList<>(categories);
+        if (!categoriesSorted.isEmpty()) {
+            categoriesSorted.sort((c1, c2) -> {
+                String o1 = c1.getName();
+                String o2 = c2.getName();
+
+                int len = Math.min(o1.length(), o2.length());
+
+                for (int i = 0; i < len; i++) {
+                    if (getCharIndex(o1.charAt(i)) != getCharIndex(o2.charAt(i))) {
+                        return getCharIndex(o1.charAt(i)) - getCharIndex(o2.charAt(i));
+                    }
+                }
+                return o1.length() - o2.length();
+            });
+            for (Category category : categoriesSorted) {
+                double totalCategoryPrice = 0;
+                ArrayList<Product> products = category.getProducts();
+                if (!products.isEmpty()) {
+                    for (Product product : products) {
+                        totalCategoryPrice += product.getFullPrice();
+                    }
+                    sb.append("Category: ").append(category).append(" | Full price in stock: ").append(totalCategoryPrice).append("\n").append("\n");
+                    products.sort((p1, p2) -> {
+                        String o1 = p1.getName();
+                        String o2 = p2.getName();
+
+                        int len = Math.min(o1.length(), o2.length());
+
+                        for (int i = 0; i < len; i++) {
+                            if (getCharIndex(o1.charAt(i)) != getCharIndex(o2.charAt(i))) {
+                                return getCharIndex(o1.charAt(i)) - getCharIndex(o2.charAt(i));
+                            }
+                        }
+                        return o1.length() - o2.length();
+                    });
+                    for (Product product : products) {
+                        sb.append(product.toString()).append(" | Full price in stock: ").append(product.getFullPrice()).append("\n");
+                    }
+                    sb.append("\n");
+                }
+                else sb.append("No products found in Category ").append(category.getName()).append("\n").append("\n");
+            }
+        }
+        else sb.append("No categories found.");
+
+        return sb.toString();
+    }
+
+    private static int getCharIndex(char c){
+        for (int i = 0; i < bilingualAlphabet.length; i++) {
+            if(bilingualAlphabet[i] == c){
+                return i;
+            }
+        }
+        return Integer.MAX_VALUE;
+    }
 
     public static void main(String[] args) {
     loadAllData();
 
+<<<<<<< HEAD
     JFrame frame = new JFrame("Add Product");
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setSize(400, 300);
@@ -324,5 +416,31 @@ public class Main {
     });
 
     frame.setVisible(true);
+=======
+        /*Category electronics = new Category("Electronics", "Electronics");
+        addCategory(electronics);
+        Category books = new Category("Books", "jsadklfjas;dlkfj");
+        addCategory(books);
+        Product laptop = new Product("Laptop", "Gaming Laptop", "MSI", 10, 1499.99);
+        addProduct(laptop, electronics);
+        updateProductData(laptop, electronics, "Laptop Pro", "High-end Gaming Laptop", "MSI", 8, 1899.99);
+        updateProductData(laptop, electronics, "Legion", "Gaming Laptop", "MSI", 10, 2499.99);
+         */
+
+        Category food = new Category("Food", "Food");
+        addCategory(food);
+        Product burger = new Product("Burger", "Gaming burger", "McDonalds", 0, 3.99);
+        addProduct(burger, food);
+        Product laptop = new Product("Laptop", "Gaming Laptop", "MSI", 10, 1499.99);
+        Category electronics = new Category("Electronics", "Electronics");
+        addProduct(laptop, electronics);
+        Product TV = new Product("TV", "TV", "TV", 10, 1999.99);
+        addProduct(TV, electronics);
+
+
+
+        System.out.println(printAllProducts());
+        System.out.println(printAllProductsByCategory());
+>>>>>>> ca6797e320f6c20809261dcc79ed281fb59b0add
     }
 }
