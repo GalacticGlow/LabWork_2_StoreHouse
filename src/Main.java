@@ -236,6 +236,7 @@ public class Main {
                         || product.getDescription().toLowerCase().contains(searchPattern)
                         || product.getProducer().toLowerCase().contains(searchPattern)) {
                     foundProducts.add(product);
+
                 }
             }
         }
