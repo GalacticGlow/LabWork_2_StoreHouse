@@ -1,6 +1,8 @@
+import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
+import javax.swing.*;
 
 public class Main {
     static ArrayList<Category> categories = new ArrayList<>();
@@ -126,24 +128,30 @@ public class Main {
         return false;
     }
 
-    public static void addProduct(Product product, Category category) {
-        boolean exists = false;
-        System.out.println("Current categoies: " + categories);
+    public static Category returnCategoryByName(String target) {
         for (Category c : categories) {
-            System.out.println("Category products - " + c.getProducts());
-            if (containsName(c.getProducts(), product.getName())) {
-                exists = true;
-                System.out.println("Product " + product.getName() + " already exists in Category " + category.getName());
-                break;
+            if (c.getName().equals(target)) {
+                return c;
             }
         }
-        if (!exists) {
-            System.out.println("Product " + product.getName() + " does not exist in Category " + category.getName());
-            category.getProducts().add(product);
-            appendToFile("ProductCategories/" + category.getName() + ".txt", product.toString());
+        return null;
+    }
+
+    public static void addProduct(Product product, Category category) {
+        Category existingCategory = returnCategoryByName(category.getName());
+        if (existingCategory == null) {
+            System.out.println("Category not found in list, cannot add product.");
+            return;
+        }
+
+        Product existingProduct = returnProductByName(existingCategory.getProducts(), product.getName());
+        if (existingProduct == null) {
+            System.out.println("Product " + product.getName() + " can be added to Category " + existingCategory.getName());
+            existingCategory.getProducts().add(product);
+            appendToFile("ProductCategories/" + existingCategory.getName() + ".txt", product.toString());
         }
         else {
-            System.out.println("Product already exists, cannot add new product");
+            System.out.println("Product " + product.getName() + " already exists in Category " + existingCategory.getName());
         }
     }
 
@@ -157,12 +165,19 @@ public class Main {
     }
 
     public static void deleteProduct(Product product, Category category) {
-        Product toRemove = returnProductByName(category.getProducts(), product.getName());
+        Category existingCategory = returnCategoryByName(category.getName());
+        if (existingCategory == null) {
+            System.out.println("Category not found in list, cannot delete product.");
+            return;
+        }
+
+        System.out.println(existingCategory.getProducts());
+        Product toRemove = returnProductByName(existingCategory.getProducts(), product.getName());
         if (toRemove != null) {
-            category.getProducts().remove(toRemove);
+            existingCategory.getProducts().remove(toRemove);
             ArrayList<String> categoryProducts = readFromFile("ProductCategories/" + category.getName() + ".txt");
             categoryProducts.remove(toRemove.toString());
-            writeAllToFile("ProductCategories/" + category.getName() + ".txt", categoryProducts);
+            writeAllToFile("ProductCategories/" + existingCategory.getName() + ".txt", categoryProducts);
         }
         else {
             System.out.println("Product does not exist, cannot delete product");
@@ -170,15 +185,26 @@ public class Main {
     }
 
     public static void updateProductData(Product product, Category category, String newName, String newDescription, String newProducer, int newAmountInStock, double newPrice) {
-        Product toUpdate = returnProductByName(category.getProducts(), product.getName());
+        Category existingCategory = returnCategoryByName(category.getName());
+        if (existingCategory == null) {
+            System.out.println("Category not found in list, cannot delete product.");
+            return;
+        }
+
+        Product toUpdate = returnProductByName(existingCategory.getProducts(), product.getName());
         if (toUpdate != null) {
-            category.getProducts().remove(toUpdate);
-            ArrayList<String> categoryProducts = readFromFile("ProductCategories/" + category.getName() + ".txt");
-            categoryProducts.remove(toUpdate.toString());
-            writeAllToFile("ProductCategories/" + category.getName() + ".txt", categoryProducts);
-            Product newProduct = new Product(newName, newDescription, newProducer, newAmountInStock, newPrice);
-            category.getProducts().add(newProduct);
-            appendToFile("ProductCategories/" + category.getName() + ".txt", newProduct.toString());
+            toUpdate.setName(newName);
+            toUpdate.setDescription(newDescription);
+            toUpdate.setProducer(newProducer);
+            toUpdate.setPrice(newPrice);
+            toUpdate.setAmountInStock(newAmountInStock);
+
+            ArrayList<String> updatedProductStrings = new ArrayList<>();
+            for (Product p : existingCategory.getProducts()) {
+                updatedProductStrings.add(p.toString());
+            }
+
+            writeAllToFile("ProductCategories/" + existingCategory.getName() + ".txt", updatedProductStrings);
         }
         else {
             System.out.println("Product does not exist, cannot update product");
@@ -226,6 +252,7 @@ public class Main {
         }
         return list;
     }
+
     public static ArrayList<Product> searchForProducts(String searchText) {
         ArrayList<Product> foundProducts = new ArrayList<>();
         String searchPattern = searchText.toLowerCase();
@@ -243,17 +270,60 @@ public class Main {
         return foundProducts;
     }
 
-
     public static void main(String[] args) {
-        loadAllData();
+    loadAllData();
 
-        Category electronics = new Category("Electronics", "Electronics");
-        addCategory(electronics);
-        Category books = new Category("Books", "jsadklfjas;dlkfj");
-        addCategory(books);
-        Product laptop = new Product("Laptop", "Gaming Laptop", "MSI", 10, 1499.99);
-        addProduct(laptop, electronics);
-        updateProductData(laptop, electronics, "Laptop Pro", "High-end Gaming Laptop", "MSI", 8, 1899.99);
-        updateProductData(laptop, electronics, "Legion", "Gaming Laptop", "MSI", 10, 2499.99);
+    JFrame frame = new JFrame("Add Product");
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setSize(400, 300);
+    frame.setLayout(new GridLayout(7, 2));
+
+    JTextField nameField = new JTextField();
+    JTextField descField = new JTextField();
+    JTextField producerField = new JTextField();
+    JTextField amountField = new JTextField();
+    JTextField priceField = new JTextField();
+    JTextField categoryField = new JTextField();
+
+    frame.add(new JLabel("Product Name:"));
+    frame.add(nameField);
+    frame.add(new JLabel("Description:"));
+    frame.add(descField);
+    frame.add(new JLabel("Producer:"));
+    frame.add(producerField);
+    frame.add(new JLabel("Amount in Stock:"));
+    frame.add(amountField);
+    frame.add(new JLabel("Price:"));
+    frame.add(priceField);
+    frame.add(new JLabel("Category Name:"));
+    frame.add(categoryField);
+
+    JButton addButton = new JButton("Add Product");
+    frame.add(addButton);
+
+    addButton.addActionListener(e -> {
+        try {
+            String name = nameField.getText();
+            String desc = descField.getText();
+            String producer = producerField.getText();
+            int amount = Integer.parseInt(amountField.getText());
+            double price = Double.parseDouble(priceField.getText());
+            String categoryName = categoryField.getText();
+
+            Category existing = returnCategoryByName(categoryName);
+            if (existing != null) {
+                Product p = new Product(name, desc, producer, amount, price);
+                addProduct(p, existing);
+                JOptionPane.showMessageDialog(frame, "Product added successfully!");
+            } else {
+                JOptionPane.showMessageDialog(frame, "Category does not exist.");
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(frame, "Error: " + ex.getMessage());
+        }
+    });
+
+    frame.setVisible(true);
+
     }
 }
