@@ -726,7 +726,8 @@ public class Main extends JFrame {
         redactAmount.setBounds(25, 110, 160, 30);
         redactAmount.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-
+                redactProductFrame.dispose();
+                showRedactAmountWindow();
             }
         });
 
@@ -908,6 +909,78 @@ public class Main extends JFrame {
         redactDescriptionFrame.add(cancelButton);
 
         redactDescriptionFrame.setVisible(true);
+    }
+
+    private void showRedactAmountWindow() {
+        JFrame redactAmountFrame = new JFrame("Redact Description");
+        redactAmountFrame.setSize(400, 350);
+        redactAmountFrame.setLayout(null);
+
+        JLabel titleField = new JLabel("Redact Product");
+        titleField.setFont(new Font("Arial", Font.PLAIN, 28));
+        titleField.setBounds(90, 10, 250, 50);
+        redactAmountFrame.add(titleField);
+
+        JTextField categoryField = new JTextField();
+        categoryField.setBounds(150, 65, 200, 35);
+        redactAmountFrame.add(categoryField);
+        JTextField nameField = new JTextField();
+        nameField.setBounds(150, 125, 200, 35);
+        redactAmountFrame.add(nameField);
+        JTextField newDescrField = new JTextField();
+        newDescrField.setBounds(180, 185, 170, 35);
+        redactAmountFrame.add(newDescrField);
+
+        JLabel categoryLabel = new JLabel("Category:");
+        categoryLabel.setBounds(25, 50, 185, 65);
+        redactAmountFrame.add(categoryLabel);
+
+        JLabel nameLabel = new JLabel("Product Name:");
+        nameLabel.setBounds(25, 110, 185, 65);
+        redactAmountFrame.add(nameLabel);
+
+        JLabel newNameLabel = new JLabel("New Product Amount:");
+        newNameLabel.setBounds(25, 170, 185, 65);
+        redactAmountFrame.add(newNameLabel);
+
+        JButton addButton = new JButton("Redact");
+        addButton.setBounds(30, 250, 150, 30);
+        redactAmountFrame.add(addButton);
+        addButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String categoryName = categoryField.getText();
+                    String name = nameField.getText();
+                    String newDescription = newDescrField.getText();
+
+                    Category checkCategory = returnCategoryByName(categoryName);
+                    if (checkCategory != null) {
+                        Product productToUpdate = returnProductByName(checkCategory.getProducts(), name);
+                        if (productToUpdate != null) {
+                            updateProductData(productToUpdate, checkCategory, productToUpdate.getName(), newDescription, productToUpdate.getProducer(), productToUpdate.getAmountInStock(), productToUpdate.getPrice());
+                            JOptionPane.showMessageDialog(redactAmountFrame, "Product description updated successfully");
+                        } else {
+                            JOptionPane.showMessageDialog(redactAmountFrame, "Product not found");
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(redactAmountFrame, "Category not found");
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(redactAmountFrame, "Error: " + ex.getMessage());
+                }
+            }
+        });
+
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.setBounds(200, 250, 150, 30);
+        cancelButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                redactAmountFrame.dispose();
+            }
+        });
+        redactAmountFrame.add(cancelButton);
+
+        redactAmountFrame.setVisible(true);
     }
 
     private void addCategoryName() {
