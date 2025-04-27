@@ -184,6 +184,16 @@ public class Main extends JFrame {
         return null;
     }
 
+    public static ArrayList<String> returnAllCategoryProductNames() {
+        ArrayList<String> allProductNames = new ArrayList<>();
+        for (Category c : categories) {
+            for (Product p : c.getProducts()) {
+                allProductNames.add(p.getName());
+            }
+        }
+        return allProductNames;
+    }
+
     public static void addProduct(Product product, Category category) {
         Category existingCategory = returnCategoryByName(category.getName());
         if (existingCategory == null) {
@@ -191,14 +201,13 @@ public class Main extends JFrame {
             return;
         }
 
-        Product existingProduct = returnProductByName(existingCategory.getProducts(), product.getName());
-        if (existingProduct == null) {
+        if (!returnAllCategoryProductNames().contains(product.getName())) {
             System.out.println("Product " + product.getName() + " can be added to Category " + existingCategory.getName());
             existingCategory.getProducts().add(product);
             appendToFile("ProductCategories/" + existingCategory.getName() + ".txt", product.toString());
         }
         else {
-            System.out.println("Product " + product.getName() + " already exists in Category " + existingCategory.getName());
+            System.out.println("Product " + product.getName() + " already exists somewhere, cannot add product.");
         }
     }
 
@@ -207,6 +216,7 @@ public class Main extends JFrame {
             if (product.getName().equals(target)) {
                 return product;
             }
+            System.out.println(product.getName());
         }
         return null;
     }
