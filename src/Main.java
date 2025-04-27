@@ -13,11 +13,18 @@ public class Main extends JFrame {
             'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'А', 'Б', 'В', 'Г', 'Ґ', 'Д', 'Е', 'Є', 'Ж', 'З', 'И', 'І', 'Ї', 'Й',
             'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц', 'Ч',
             'Ш', 'Щ', 'Ь', 'Ю', 'Я'};
+    private double totalCategoryCostRounded;
+
     private JList goodsGroupList;
     private JTable goodsArea;
     private JTextArea categoryStatisticsText;
+    private JTextArea generalStatisticsText;
     private JFrame addProductFrame;
     private JFrame addCategoryFrame;
+    private JFrame removeCategoryFrame;
+    private JFrame removeProductFrame;
+    private JFrame redactCategoryFrame;
+    private JFrame redactProductFrame;
     ArrayList<String> categoryNames;
 
     public static boolean contains(String[] arr, String target) {
@@ -435,9 +442,9 @@ public class Main extends JFrame {
                         for(Product p : selectedCategory.getProducts()) {
                             totalCategoryCost += p.getAmountInStock() * p.getPrice();
                         }
-                        double totalCategoryCostRounded = Math.round(totalCategoryCost * 100.0) / 100.0;
+                        totalCategoryCostRounded = Math.round(totalCategoryCost * 100.0) / 100.0;
 
-                        categoryStatisticsText.setText("Total cost of goods in the category: " + totalCategoryCostRounded);
+                        categoryStatisticsText.setText("Total cost of the goods in the category: " + totalCategoryCostRounded);
                     }
                 }
             }
@@ -447,7 +454,28 @@ public class Main extends JFrame {
         JScrollPane goodsScrollPane = new JScrollPane(goodsArea);
         goodsScrollPane.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         goodsScrollPane.setBounds(375, 50, 590, 200);
+        goodsArea.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting()) {
+                    int selectedRow = goodsArea.getSelectedRow();
+                    if (selectedRow != -1) {
+                        Object amountInRow = goodsArea.getValueAt(selectedRow, 3);
+                        Object priceInRow = goodsArea.getValueAt(selectedRow, 4);
 
+                        int amount = Integer.parseInt(amountInRow.toString());
+                        double price = Double.parseDouble(priceInRow.toString());
+
+                        double totalCost = amount * price;
+                        double totalCostRounded = Math.round(totalCost * 100.0) / 100.0;
+
+                        categoryStatisticsText.setText("Total cost of the goods in the category: " + totalCategoryCostRounded
+                                + "\nTotal cost of the selected goods: " + totalCostRounded);
+                    }
+                }
+            }
+        });
+
+        // Category Statistics
         JLabel categoryStatisticsLabel = new JLabel("Category Statistics");
         categoryStatisticsLabel.setFont(new Font("Arial", Font.PLAIN, 24));
         categoryStatisticsLabel.setBounds(375, 260, 300, 50);
@@ -464,38 +492,422 @@ public class Main extends JFrame {
         categoryStatisticsScrollPane.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         categoryStatisticsScrollPane.setBounds(375, 300, 590, 150);
 
+        // General statistics information
+        JLabel generalStatsLabel = new JLabel("General Statistics");
+        generalStatsLabel.setFont(new Font("Arial", Font.PLAIN, 24));
+        generalStatsLabel.setBounds(15, 450, 300, 50);
+
+        int totalStorageAmount = 0;
+        for(Category c : categories) {
+            for(Product p : c.getProducts()) {
+                totalStorageAmount += p.getAmountInStock();
+            }
+        }
+        double totalStorageCost = 0;
+        for(Category c : categories) {
+            for(Product p : c.getProducts()) {
+                totalStorageCost += p.getPrice() * p.getAmountInStock();
+            }
+        }
+        totalStorageCost = Math.round(totalStorageCost * 100.0) / 100.0;
+
+        generalStatisticsText = new JTextArea();
+        generalStatisticsText.setEditable(false);
+        generalStatisticsText.setMargin(new Insets(15, 10, 15,10));
+        generalStatisticsText.setLineWrap(true);
+        generalStatisticsText.setWrapStyleWord(true);
+        generalStatisticsText.setFont(new Font("Arial", Font.PLAIN, 19));
+        generalStatisticsText.setText("Total amount of goods is: " + totalStorageAmount
+                                    + "\n\nTotal cost of goods is: " + totalStorageCost);
+        JScrollPane generalStatisticsScrollPane = new JScrollPane(generalStatisticsText);
+        generalStatisticsScrollPane.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        generalStatisticsScrollPane.setBounds(15, 490, 460, 150);
+
         // Button for adding categories and products
         JButton addButton = new JButton();
         addButton.setText("Add");
         addButton.setFont(new Font("Arial", Font.PLAIN, 24));
         addButton.setBounds(520, 490, 200, 50);
-
         addButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                if(addCategoryFrame != null) {
+                    addCategoryFrame.dispose();
+                }
+                if(addProductFrame != null) {
+                    addProductFrame.dispose();
+                }
                 showAddChoiceWindow();
             }
         });
 
         // Button for adding categories and products
-        JButton removeButton = new JButton();
-        removeButton.setText("Delete");
+        JButton removeButton = new JButton("Delete");
         removeButton.setFont(new Font("Arial", Font.PLAIN, 24));
         removeButton.setBounds(750, 490, 200, 50);
         removeButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                if(removeCategoryFrame != null) {
+                    removeCategoryFrame.dispose();
+                }
+                if(removeProductFrame != null) {
+                    removeProductFrame.dispose();
+                }
                 showRemoveChoiceWindow();
             }
         });
 
+        // Redacting categories and products
+        JButton redactButton = new JButton("Redact");
+        redactButton.setFont(new Font("Arial", Font.PLAIN, 24));
+        redactButton.setBounds(520, 570, 200, 50);
+        redactButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                showRedactChoiceButton();
+            }
+        });
+
+        // Searching for categories and products
+        JButton searchButton = new JButton("Search");
+        searchButton.setFont(new Font("Arial", Font.PLAIN, 24));
+        searchButton.setBounds(750, 570, 200, 50);
+        searchButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
 
         this.add(addButton);
         this.add(removeButton);
+        this.add(redactButton);
+        this.add(searchButton);
+        this.add(generalStatsLabel);
+        this.add(generalStatisticsScrollPane);
         this.add(categoryStatisticsLabel);
         this.add(categoryStatisticsScrollPane);
         this.add(goodsCatagoryLabel);
         this.add(goodsLabel);
         this.add(goodsGroupList);
         this.add(goodsScrollPane);
+    }
+
+    private void showRedactChoiceButton() {
+        JFrame redactChoiceFrame = new JFrame("Redacting");
+        redactChoiceFrame.setSize(350, 200);
+        redactChoiceFrame.setLayout(null);
+        JLabel choiceLabel = new JLabel("<html>Do you want to redact a category<br> or a product?</html>");
+        choiceLabel.setBounds(15, 10, 250, 70);
+        choiceLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        choiceLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        JButton addCategoryButton = new JButton("Redact Category");
+        addCategoryButton.setBounds(25, 100, 130, 30);
+        addCategoryButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                redactChoiceFrame.dispose();
+                if(redactCategoryFrame != null) {
+                    redactCategoryFrame.dispose();
+                }
+                showRedactCategoryWindow();
+            }
+        });
+
+        JButton addProductButton = new JButton("Redact Product");
+        addProductButton.setBounds(180, 100, 130, 30);
+        addProductButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                redactChoiceFrame.dispose();
+                if(redactProductFrame != null) {
+                    redactProductFrame.dispose();
+                }
+                showRedactProductWindow();
+            }
+        });
+
+        redactChoiceFrame.add(addCategoryButton);
+        redactChoiceFrame.add(addProductButton);
+        redactChoiceFrame.add(choiceLabel);
+        redactChoiceFrame.setVisible(true);
+    }
+
+    private void showRedactCategoryWindow() {
+        redactCategoryFrame = new JFrame("Redact Category");
+        redactCategoryFrame.setSize(400, 270);
+        redactCategoryFrame.setLayout(null);
+
+        JLabel titleField = new JLabel("Redact Category");
+        titleField.setFont(new Font("Arial", Font.PLAIN, 28));
+        titleField.setBounds(90, 10, 250, 50);
+        redactCategoryFrame.add(titleField);
+
+        JTextField nameField = new JTextField();
+        nameField.setBounds(150, 65, 200, 35);
+        JTextField newNameField = new JTextField();
+        newNameField.setBounds(150, 125, 200, 35);
+
+        JLabel nameLabel = new JLabel("Category Name:");
+        nameLabel.setBounds(25, 50, 185, 65);
+        redactCategoryFrame.add(nameLabel);
+        redactCategoryFrame.add(nameField);
+
+        JLabel newNameLabel = new JLabel("New Category Name:");
+        newNameLabel.setBounds(25, 110, 185, 65);
+        redactCategoryFrame.add(newNameLabel);
+        redactCategoryFrame.add(newNameField);
+
+        JButton addButton = new JButton("Redact");
+        addButton.setBounds(30, 180, 150, 30);
+        redactCategoryFrame.add(addButton);
+        addButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String categoryName = nameField.getText();
+                    String categoryNewName = newNameField.getText();
+                    Category categoryToUpdate = returnCategoryByName(categoryName);
+                    if(categoryToUpdate != null) {
+                        updateCategoryName(categoryToUpdate, categoryNewName);
+                        JOptionPane.showMessageDialog(redactCategoryFrame, "Category name updated successfully");
+                        updateCategoryList();
+                        nameField.setText("");
+                        newNameField.setText("");
+                    } else {
+                        JOptionPane.showMessageDialog(redactCategoryFrame, "Category not found");
+                        nameField.setText("");
+                        newNameField.setText("");
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(redactCategoryFrame, "Error: " + ex.getMessage());
+                }
+            }
+        });
+
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.setBounds(200, 180, 150, 30);
+        cancelButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                redactCategoryFrame.dispose();
+            }
+        });
+        redactCategoryFrame.add(cancelButton);
+
+        redactCategoryFrame.setVisible(true);
+    }
+
+    private void showRedactProductWindow() {
+        redactProductFrame = new JFrame("Redact Product");
+        redactProductFrame.setSize(400, 300);
+        redactProductFrame.setLayout(null);
+        JLabel titleField = new JLabel("What to redact?");
+        titleField.setFont(new Font("Arial", Font.PLAIN, 28));
+        titleField.setBounds(90, 10, 250, 50);
+        redactProductFrame.add(titleField);
+
+        JButton redactName = new JButton("Redact Name");
+        redactName.setFont(new Font("Arial", Font.PLAIN, 18));
+        redactName.setBounds(25, 70, 160, 30);
+        redactName.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                redactProductFrame.dispose();
+                showRedactNameWindow();
+            }
+        });
+
+        JButton redactDescr = new JButton("Redact Description");
+        redactDescr.setFont(new Font("Arial", Font.PLAIN, 14));
+        redactDescr.setBounds(200, 70, 160, 30);
+        redactDescr.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                redactProductFrame.dispose();
+                showRedactDescriptionWindow();
+            }
+        });
+
+        JButton redactAmount = new JButton("Redact Amount");
+        redactAmount.setFont(new Font("Arial", Font.PLAIN, 18));
+        redactAmount.setBounds(25, 110, 160, 30);
+        redactAmount.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
+
+        JButton redactPrice = new JButton("Redact Price");
+        redactPrice.setFont(new Font("Arial", Font.PLAIN, 18));
+        redactPrice.setBounds(200, 110, 160, 30);
+        redactPrice.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
+
+        JButton redactProducer = new JButton("Redact Producer");
+        redactProducer.setBounds(105, 150, 180, 30);
+        redactProducer.setFont(new Font("Arial", Font.PLAIN, 17));
+        redactProducer.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
+
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.setBounds(125, 200, 150, 30);
+        cancelButton.setFont(new Font("Arial", Font.PLAIN, 18));
+        cancelButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                redactProductFrame.dispose();
+            }
+        });
+
+        redactProductFrame.setVisible(true);
+        redactProductFrame.add(redactName);
+        redactProductFrame.add(redactDescr);
+        redactProductFrame.add(redactProducer);
+        redactProductFrame.add(redactAmount);
+        redactProductFrame.add(redactPrice);
+        redactProductFrame.add(cancelButton);
+    }
+
+    private void showRedactNameWindow() {
+        JFrame redactNameFrame = new JFrame("Redact Name");
+        redactNameFrame.setSize(400, 350);
+        redactNameFrame.setLayout(null);
+
+        JLabel titleField = new JLabel("Redact Product");
+        titleField.setFont(new Font("Arial", Font.PLAIN, 28));
+        titleField.setBounds(90, 10, 250, 50);
+        redactNameFrame.add(titleField);
+
+        JTextField categoryField = new JTextField();
+        categoryField.setBounds(150, 65, 200, 35);
+        redactNameFrame.add(categoryField);
+        JTextField nameField = new JTextField();
+        nameField.setBounds(150, 125, 200, 35);
+        redactNameFrame.add(nameField);
+        JTextField newNameField = new JTextField();
+        newNameField.setBounds(150, 185, 200, 35);
+        redactNameFrame.add(newNameField);
+
+        JLabel categoryLabel = new JLabel("Category:");
+        categoryLabel.setBounds(25, 50, 185, 65);
+        redactNameFrame.add(categoryLabel);
+
+        JLabel nameLabel = new JLabel("Product Name:");
+        nameLabel.setBounds(25, 110, 185, 65);
+        redactNameFrame.add(nameLabel);
+
+        JLabel newNameLabel = new JLabel("New Product Name:");
+        newNameLabel.setBounds(25, 170, 185, 65);
+        redactNameFrame.add(newNameLabel);
+
+        JButton addButton = new JButton("Redact");
+        addButton.setBounds(30, 250, 150, 30);
+        redactNameFrame.add(addButton);
+        addButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String categoryName = categoryField.getText();
+                    String name = nameField.getText();
+                    String newName = newNameField.getText();
+
+                    Category checkCategory = returnCategoryByName(categoryName);
+                    if (checkCategory != null) {
+                        Product productToUpdate = returnProductByName(checkCategory.getProducts(), name);
+                        if (productToUpdate != null) {
+                            updateProductData(productToUpdate, checkCategory, newName, productToUpdate.getDescription(), productToUpdate.getProducer(), productToUpdate.getAmountInStock(), productToUpdate.getPrice());
+                            JOptionPane.showMessageDialog(redactProductFrame, "Product name updated successfully");
+                        } else {
+                            JOptionPane.showMessageDialog(redactProductFrame, "Product not found");
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(redactProductFrame, "Category not found");
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(redactNameFrame, "Error: " + ex.getMessage());
+                }
+            }
+        });
+
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.setBounds(200, 250, 150, 30);
+        cancelButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                redactNameFrame.dispose();
+            }
+        });
+        redactNameFrame.add(cancelButton);
+
+        redactNameFrame.setVisible(true);
+    }
+
+    private void showRedactDescriptionWindow() {
+        JFrame redactDescriptionFrame = new JFrame("Redact Description");
+        redactDescriptionFrame.setSize(400, 350);
+        redactDescriptionFrame.setLayout(null);
+
+        JLabel titleField = new JLabel("Redact Product");
+        titleField.setFont(new Font("Arial", Font.PLAIN, 28));
+        titleField.setBounds(90, 10, 250, 50);
+        redactDescriptionFrame.add(titleField);
+
+        JTextField categoryField = new JTextField();
+        categoryField.setBounds(150, 65, 200, 35);
+        redactDescriptionFrame.add(categoryField);
+        JTextField nameField = new JTextField();
+        nameField.setBounds(150, 125, 200, 35);
+        redactDescriptionFrame.add(nameField);
+        JTextField newDescrField = new JTextField();
+        newDescrField.setBounds(180, 185, 170, 35);
+        redactDescriptionFrame.add(newDescrField);
+
+        JLabel categoryLabel = new JLabel("Category:");
+        categoryLabel.setBounds(25, 50, 185, 65);
+        redactDescriptionFrame.add(categoryLabel);
+
+        JLabel nameLabel = new JLabel("Product Name:");
+        nameLabel.setBounds(25, 110, 185, 65);
+        redactDescriptionFrame.add(nameLabel);
+
+        JLabel newNameLabel = new JLabel("New Product Description:");
+        newNameLabel.setBounds(25, 170, 185, 65);
+        redactDescriptionFrame.add(newNameLabel);
+
+        JButton addButton = new JButton("Redact");
+        addButton.setBounds(30, 250, 150, 30);
+        redactDescriptionFrame.add(addButton);
+        addButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String categoryName = categoryField.getText();
+                    String name = nameField.getText();
+                    String newDescription = newDescrField.getText();
+
+                    Category checkCategory = returnCategoryByName(categoryName);
+                    if (checkCategory != null) {
+                        Product productToUpdate = returnProductByName(checkCategory.getProducts(), name);
+                        if (productToUpdate != null) {
+                            updateProductData(productToUpdate, checkCategory, productToUpdate.getName(), newDescription, productToUpdate.getProducer(), productToUpdate.getAmountInStock(), productToUpdate.getPrice());
+                            JOptionPane.showMessageDialog(redactProductFrame, "Product description updated successfully");
+                        } else {
+                            JOptionPane.showMessageDialog(redactProductFrame, "Product not found");
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(redactProductFrame, "Category not found");
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(redactDescriptionFrame, "Error: " + ex.getMessage());
+                }
+            }
+        });
+
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.setBounds(200, 250, 150, 30);
+        cancelButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                redactDescriptionFrame.dispose();
+            }
+        });
+        redactDescriptionFrame.add(cancelButton);
+
+        redactDescriptionFrame.setVisible(true);
     }
 
     private void addCategoryName() {
@@ -506,9 +918,9 @@ public class Main extends JFrame {
     }
 
     private void showAddChoiceWindow() {
-        JFrame choiceFrame = new JFrame("Add");
-        choiceFrame.setSize(350, 200);
-        choiceFrame.setLayout(null);
+        JFrame addChoiceFrame = new JFrame("Add");
+        addChoiceFrame.setSize(350, 200);
+        addChoiceFrame.setLayout(null);
         JLabel choiceLabel = new JLabel("<html>Do you want to add a category<br> or a product?</html>");
         choiceLabel.setBounds(15, 10, 250, 70);
         choiceLabel.setFont(new Font("Arial", Font.BOLD, 14));
@@ -518,10 +930,7 @@ public class Main extends JFrame {
         addCategoryButton.setBounds(25, 100, 130, 30);
         addCategoryButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                choiceFrame.dispose();
-                if(addCategoryFrame != null) {
-                    addCategoryFrame.dispose();
-                };
+                addChoiceFrame.dispose();
                 showAddCategoryWindow();
             }
         });
@@ -530,18 +939,15 @@ public class Main extends JFrame {
         addProductButton.setBounds(180, 100, 130, 30);
         addProductButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                choiceFrame.dispose();
-                if(addProductFrame != null) {
-                    addProductFrame.dispose();
-                }
+                addChoiceFrame.dispose();
                 showAddProductWindow();
             }
         });
 
-        choiceFrame.add(addCategoryButton);
-        choiceFrame.add(addProductButton);
-        choiceFrame.add(choiceLabel);
-        choiceFrame.setVisible(true);
+        addChoiceFrame.add(addCategoryButton);
+        addChoiceFrame.add(addProductButton);
+        addChoiceFrame.add(choiceLabel);
+        addChoiceFrame.setVisible(true);
     }
 
     private void showAddCategoryWindow() {
@@ -581,6 +987,10 @@ public class Main extends JFrame {
                     Category checkCategory = returnCategoryByName(name);
                     if(checkCategory == null) {
                         Category categoryToAdd = new Category(name, desc);
+                        if(categoryToAdd.getName().isEmpty()) {
+                            JOptionPane.showMessageDialog(addCategoryFrame, "Enter the name of the Category");
+                            return;
+                        }
                         addCategory(categoryToAdd);
                         JOptionPane.showMessageDialog(addCategoryFrame, "Category added successfully!");
                         nameField.setText("");
@@ -704,21 +1114,22 @@ public class Main extends JFrame {
     }
 
     private void showRemoveChoiceWindow() {
-        JFrame choiceFrame = new JFrame("Write-off Product");
-        choiceFrame.setSize(350, 200);
-        choiceFrame.setLayout(null);
+        JFrame removeChoiceFrame = new JFrame("Write-off");
+        removeChoiceFrame.setSize(350, 200);
+        removeChoiceFrame.setLayout(null);
         JLabel choiceLabel = new JLabel("<html>Do you want to write-off a product<br> or remove a category?</html>");
         choiceLabel.setBounds(15, 10, 250, 70);
         choiceLabel.setFont(new Font("Arial", Font.BOLD, 14));
         choiceLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        choiceFrame.add(choiceLabel);
-        choiceFrame.setVisible(true);
+        removeChoiceFrame.add(choiceLabel);
+        removeChoiceFrame.setVisible(true);
 
         JButton removeCategoryButton = new JButton("Remove Category");
         removeCategoryButton.setBounds(25, 100, 130, 30);
         removeCategoryButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-
+                removeChoiceFrame.dispose();
+                showRemoveCategoryWindow();
             }
         });
 
@@ -726,11 +1137,132 @@ public class Main extends JFrame {
         removeProductButton.setBounds(180, 100, 130, 30);
         removeProductButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-
+                removeChoiceFrame.dispose();
+                showRemoveProductWindow();
             }
         });
-        choiceFrame.add(removeCategoryButton);
-        choiceFrame.add(removeProductButton);
+        removeChoiceFrame.add(removeCategoryButton);
+        removeChoiceFrame.add(removeProductButton);
+    }
+
+    private void showRemoveCategoryWindow() {
+        removeCategoryFrame = new JFrame("Remove Category");
+        removeCategoryFrame.setSize(400, 200);
+        removeCategoryFrame.setLayout(null);
+
+        JLabel titleField = new JLabel("Remove Category");
+        titleField.setFont(new Font("Arial", Font.PLAIN, 28));
+        titleField.setBounds(70, 10, 250, 50);
+        removeCategoryFrame.add(titleField);
+
+        JTextField nameField = new JTextField();
+        nameField.setBounds(130, 65, 220, 35);
+        JTextField descField = new JTextField();
+        descField.setBounds(130, 125, 220, 35);
+
+        JLabel nameLabel = new JLabel("Category Name:");
+        nameLabel.setBounds(25, 50, 185, 65);
+        removeCategoryFrame.add(nameLabel);
+        removeCategoryFrame.add(nameField);
+
+        JButton addButton = new JButton("Remove");
+        addButton.setBounds(30, 120, 150, 30);
+        removeCategoryFrame.add(addButton);
+        addButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String name = nameField.getText();
+
+                    Category checkCategory = returnCategoryByName(name);
+                    if(checkCategory != null) {
+                        deleteCategory(checkCategory);
+                        JOptionPane.showMessageDialog(removeCategoryFrame, "Category removed successfully!");
+                        nameField.setText("");
+                        addCategoryName();
+                        updateCategoryList();
+                        //              addCategoryFrame.dispose();
+                    } else {
+                        JOptionPane.showMessageDialog(removeCategoryFrame, "Category doesn't exist!");
+                        nameField.setText("");
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(addProductFrame, "Error: " + ex.getMessage());
+                }
+            }
+        });
+
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.setBounds(200, 120, 150, 30);
+        cancelButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                removeCategoryFrame.dispose();
+            }
+        });
+        removeCategoryFrame.add(cancelButton);
+
+        removeCategoryFrame.setVisible(true);
+    }
+
+    private void showRemoveProductWindow() {
+        removeProductFrame = new JFrame("Write-off Product");
+        removeProductFrame.setSize(400, 270);
+        removeProductFrame.setLayout(null);
+
+        JTextField nameField = new JTextField();
+        nameField.setBounds(130, 65, 220, 35);
+        JTextField categoryField = new JTextField();
+        categoryField.setBounds(130, 125, 220, 35);
+
+        JLabel titleField = new JLabel("Write-off Product");
+        titleField.setFont(new Font("Arial", Font.PLAIN, 28));
+        titleField.setBounds(110, 10, 200, 30);
+        removeProductFrame.add(titleField);
+
+        JLabel nameLabel = new JLabel("Product Name:");
+        nameLabel.setBounds(25, 50, 185, 65);
+        removeProductFrame.add(nameLabel);
+        removeProductFrame.add(nameField);
+
+        JLabel categoryLabel = new JLabel("Category Name:");
+        categoryLabel.setBounds(25, 110, 185, 65);
+        removeProductFrame.add(categoryLabel);
+        removeProductFrame.add(categoryField);
+
+        JButton addButton = new JButton("Write-off Product");
+        addButton.setBounds(30, 180, 150, 30);
+        removeProductFrame.add(addButton);
+        addButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String productName = nameField.getText();
+                    String categoryName = categoryField.getText();
+
+                    Category checkCategory = returnCategoryByName(categoryName);
+                    if(checkCategory != null) {
+                        Product checkProduct = returnProductByName(checkCategory.getProducts() ,productName);
+                        if(checkProduct != null) {
+                            deleteProduct(checkProduct, checkCategory);
+                            JOptionPane.showMessageDialog(removeProductFrame, "Product removed successfully!");
+                        } else {
+                            JOptionPane.showMessageDialog(removeProductFrame, "Product doesn't exist!");
+                        }
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(removeProductFrame, "Error: " + ex.getMessage());
+                }
+            }
+        });
+
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.setBounds(200, 180, 150, 30);
+        cancelButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                removeProductFrame.dispose();
+            }
+        });
+        removeProductFrame.add(cancelButton);
+
+        removeProductFrame.setVisible(true);
     }
 
     public static void main(String[] args) {

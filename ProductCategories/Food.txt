@@ -1,4 +1,3 @@
+BigMac | Gaming burger | McDonalds | 5 | 3.99
 Burger | Gaming burger | McDonalds | 5 | 3.99
-Burger | Gaming burger | McDonalds | 5 | 3.99
-gijo | uhiu`i | ihuhjiu | 53 | 34.0
 CocaCola | yummy drink | The Coca-Cola Company | 15 | 51.49
