@@ -472,7 +472,11 @@ public class Main extends JFrame {
         addCategoryName();
 
         Category[] selectedCateg = {null};
-        String[] categoryList = categoryNames.toArray(new String[0]);
+        String[] categoryList = new String[categoryNames.size() + 1];
+        categoryList[0] = "All Categories";
+        for (int i = 0; i < categoryNames.size(); i++) {
+            categoryList[i + 1] = categoryNames.get(i);
+        }
         goodsGroupList = new JList<>(categoryList);
         goodsGroupList.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
@@ -483,6 +487,32 @@ public class Main extends JFrame {
                 if (!e.getValueIsAdjusting()) {
                     String selected = (String) goodsGroupList.getSelectedValue();
                     if (selected == null) return;
+
+                    if (selected.equals("All Categories")) {
+                        selectedCateg[0] = null;
+                        ArrayList<Product> allProducts = new ArrayList<>();
+                        for (Category c : categories) {
+                            allProducts.addAll(c.getProducts());
+                        }
+                        String[][] data = new String[allProducts.size()][5];
+                        for (int i = 0; i < allProducts.size(); i++) {
+                            Product p = allProducts.get(i);
+                            data[i][0] = p.getName();
+                            data[i][1] = p.getDescription();
+                            data[i][2] = p.getProducer();
+                            data[i][3] = String.valueOf(p.getAmountInStock());
+                            data[i][4] = String.valueOf(p.getPrice());
+                        }
+                        String[] property = {"Name", "Description", "Producer", "Remained", "Price per piece"};
+                        DefaultTableModel model = new DefaultTableModel(data, property) {
+                            public boolean isCellEditable(int row, int column) {
+                                return false;
+                            }
+                        };
+                        goodsArea.setModel(model);
+
+                        categoryStatisticsText.setText("All categories");
+                    }
 
                     // Searching for a category
                     Category selectedCategory = null;
@@ -549,9 +579,17 @@ public class Main extends JFrame {
                         double totalCost = amount * price;
                         double totalCostRounded = Math.round(totalCost * 100.0) / 100.0;
 
-                        categoryStatisticsText.setText("The Category description:" + selectedCateg[0].getDescription()
-                                + "\n\nTotal cost of the goods in the category: " + totalCategoryCostRounded
-                                + "\n\nTotal cost of the selected goods: " + totalCostRounded);
+                        if (selectedCateg[0] != null) {
+                            categoryStatisticsText.setText("The Category description:" + selectedCateg[0].getDescription()
+                                    + "\n\nTotal cost of the goods in the category: " + totalCategoryCostRounded
+                                    + "\n\nTotal cost of the selected goods: " + totalCostRounded);
+                        }
+                        else {
+                            categoryStatisticsText.setText("All categories"
+                            + "\n\nTotal cost of the selected goods: " + totalCostRounded);
+                        }
+
+
                     }
                 }
             }
