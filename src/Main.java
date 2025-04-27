@@ -474,8 +474,10 @@ public class Main extends JFrame {
         Category[] selectedCateg = {null};
         String[] categoryList = categoryNames.toArray(new String[0]);
         goodsGroupList = new JList<>(categoryList);
-        goodsGroupList.setBounds(15, 50, 300, 400);
         goodsGroupList.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+        JScrollPane goodsGroupScrollPane = new JScrollPane(goodsGroupList);
+        goodsGroupScrollPane.setBounds(15, 50, 300, 400);
         goodsGroupList.addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent e) {
                 if (!e.getValueIsAdjusting()) {
@@ -653,7 +655,7 @@ public class Main extends JFrame {
         this.add(categoryStatisticsScrollPane);
         this.add(goodsCatagoryLabel);
         this.add(goodsLabel);
-        this.add(goodsGroupList);
+        this.add(goodsGroupScrollPane);
         this.add(goodsScrollPane);
     }
 
