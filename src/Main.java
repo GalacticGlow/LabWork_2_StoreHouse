@@ -34,7 +34,7 @@ public class Main extends JFrame {
         return false;
     }
 
-    public static void loadAllData(){
+    public static void loadAllData() {
         ArrayList<String> categoryData = readFromFile("src/Categories.txt");
         for (String str : categoryData) {
             String[] arr = str.split(" \\|");
@@ -66,17 +66,15 @@ public class Main extends JFrame {
             }
 
             String[] fileNames = folder.list();
-            if (!contains(fileNames, category.getName()+".txt")) {
+            if (!contains(fileNames, category.getName() + ".txt")) {
                 File categoryFile = new File("ProductCategories/" + category.getName() + ".txt");
                 try {
                     categoryFile.createNewFile();
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     System.out.println("Error creating file: " + e.getMessage());
                 }
             }
-        }
-        else {
+        } else {
             System.out.println("Category already exists, cannot add new category");
         }
     }
@@ -87,8 +85,7 @@ public class Main extends JFrame {
             System.out.println("Deleted Category: " + category.getName());
             System.out.println(categories);
             ArrayList<String> existingCategories = readFromFile("src/Categories.txt");
-            existingCategories.remove(category.toString());
-            System.out.println(existingCategories);
+            existingCategories.removeIf(line -> line.startsWith(category.getName() + " |"));
             writeAllToFile("src/Categories.txt", existingCategories);
 
             File folder = new File("ProductCategories/");
@@ -100,13 +97,12 @@ public class Main extends JFrame {
             File[] files = folder.listFiles();
             for (File file : files) {
                 System.out.println(file.getName());
-                if (file.getName().equals(category.getName()+".txt")) {
+                if (file.getName().equals(category.getName() + ".txt")) {
                     file.delete();
                     break;
                 }
             }
-        }
-        else {
+        } else {
             System.out.println("Category does not exist, cannot delete category");
         }
     }
@@ -114,31 +110,61 @@ public class Main extends JFrame {
     public static void updateCategoryName(Category category, String newName) {
         if (categories.contains(category)) {
             String oldName = category.getName();
+
+            // Update the in-memory category list
             categories.remove(category);
             category.setName(newName);
             categories.add(category);
+
+            // Read Categories.txt
             ArrayList<String> existingCategories = readFromFile("src/Categories.txt");
-            Collections.replaceAll(existingCategories, oldName, newName);
+            System.out.println("Existing categories before update: " + existingCategories);
+
+            // Replace oldName with newName in the existing categories list
+            for (int i = 0; i < existingCategories.size(); i++) {
+                if (existingCategories.get(i).trim().contains(oldName.trim())) {
+                    existingCategories.set(i, newName + " | " + category.getDescription());
+                    break;
+                }
+                System.out.println(existingCategories.get(i).trim());
+            }
+
+            // Write the updated list back to Categories.txt
+            System.out.println("Existing categories after update: " + existingCategories);
             writeAllToFile("src/Categories.txt", existingCategories);
 
+            // Rename the corresponding category file
             File folder = new File("ProductCategories/");
             if (!folder.exists()) {
                 folder.mkdirs();
             }
 
             File[] files = folder.listFiles();
+            System.out.println("Files in ProductCategories before renaming: ");
+            for (File file : files) {
+                System.out.println(file.getName());
+            }
+
+            // Rename file if it exists
             for (File file : files) {
                 if (file.getName().equals(oldName + ".txt")) {
-                    file.renameTo(new File(folder, newName + ".txt"));
+                    if (file.renameTo(new File(folder, newName + ".txt"))) {
+                        System.out.println("Renamed file: " + file.getName() + " to " + newName + ".txt");
+                    } else {
+                        System.out.println("Failed to rename file: " + oldName + ".txt");
+                    }
                     break;
                 }
             }
-            System.out.println("Updated Category: " + category.getName() + "current state of ProductCategories" + categories);
-        }
-        else {
+
+            // Final output to show success
+            System.out.println("Updated Category: " + category.getName());
+            System.out.println("Current state of ProductCategories: " + categories);
+        } else {
             System.out.println("Category does not exist, cannot update category");
         }
     }
+
 
     public static boolean containsName(ArrayList<Product> products, String targetName) {
         for (Product product : products) {
@@ -249,12 +275,14 @@ public class Main extends JFrame {
     }
 
     public static void writeAllToFile(String fileName, ArrayList<String> lines) {
-        try (FileWriter writer = new FileWriter(fileName)) {
+        System.out.println("Attempting to write to file: " + fileName);  // Debugging line
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
             for (String line : lines) {
-                writer.write(line + "\n");
+                writer.write(line);
+                writer.newLine();
             }
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            System.out.println("Error writing to file: " + e.getMessage());
         }
     }
 
