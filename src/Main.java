@@ -28,6 +28,7 @@ public class Main extends JFrame {
     private JFrame redactProductFrame;
     private JFrame searchFrame;
     ArrayList<String> categoryNames;
+    Category[] selectedCateg = {null};
 
     public static boolean contains(String[] arr, String target) {
         for (String str : arr) {
@@ -57,7 +58,7 @@ public class Main extends JFrame {
 
     public static void addCategory(Category category) {
         ArrayList<String> existingCategories = readFromFile("src/Categories.txt");
-        if (!existingCategories.contains(category.toString())) {
+        if (!existingCategories.contains(category.toString()) && !category.getName().equalsIgnoreCase("All Categories")) {
             categories.add(category);
             appendToFile("src/Categories.txt", category.toString());
 
@@ -211,44 +212,41 @@ public class Main extends JFrame {
         }
     }
 
-    public static Product returnProductByName(ArrayList<Product> products, String target) {
-        for (Product product : products) {
-            if (product.getName().equals(target)) {
-                return product;
+    public static Product returnProductByName(String target) {
+        for (Category c : categories) {
+            for (Product p : c.getProducts()) {
+                if (p.getName().equalsIgnoreCase(target)) return p;
             }
-            System.out.println(product.getName());
+        }
+        return null;
+    }
+    public static Category returnCategoryByProduct(Product product) {
+        for (Category c : categories) {
+            if (c.getProducts().contains(product)) return c;
         }
         return null;
     }
 
-    public static void deleteProduct(Product product, Category category) {
-        Category existingCategory = returnCategoryByName(category.getName());
-        if (existingCategory == null) {
-            System.out.println("Category not found in list, cannot delete product.");
-            return;
-        }
-
-        System.out.println(existingCategory.getProducts());
-        Product toRemove = returnProductByName(existingCategory.getProducts(), product.getName());
+    public static void deleteProduct(Product product) {
+        Product toRemove = returnProductByName(product.getName());
         if (toRemove != null) {
-            existingCategory.getProducts().remove(toRemove);
-            ArrayList<String> categoryProducts = readFromFile("ProductCategories/" + category.getName() + ".txt");
-            categoryProducts.remove(toRemove.toString());
-            writeAllToFile("ProductCategories/" + existingCategory.getName() + ".txt", categoryProducts);
-        }
-        else {
+            Category category = returnCategoryByProduct(toRemove);
+            if (category != null) {
+                category.getProducts().remove(toRemove);
+                ArrayList<String> categoryProducts = readFromFile("ProductCategories/" + category.getName() + ".txt");
+                categoryProducts.remove(toRemove.toString());
+                writeAllToFile("ProductCategories/" + category.getName() + ".txt", categoryProducts);
+            } else {
+                System.out.println("Error: product category not found");
+            }
+        } else {
             System.out.println("Product does not exist, cannot delete product");
         }
     }
 
     public static void updateProductData(Product product, Category category, String newName, String newDescription, String newProducer, int newAmountInStock, double newPrice) {
-        Category existingCategory = returnCategoryByName(category.getName());
-        if (existingCategory == null) {
-            System.out.println("Category not found in list, cannot delete product.");
-            return;
-        }
 
-        Product toUpdate = returnProductByName(existingCategory.getProducts(), product.getName());
+        Product toUpdate = returnProductByName(product.getName());
         if (toUpdate != null) {
             toUpdate.setName(newName);
             toUpdate.setDescription(newDescription);
@@ -257,11 +255,10 @@ public class Main extends JFrame {
             toUpdate.setAmountInStock(newAmountInStock);
 
             ArrayList<String> updatedProductStrings = new ArrayList<>();
-            for (Product p : existingCategory.getProducts()) {
+            for (Product p : Objects.requireNonNull(returnCategoryByProduct(toUpdate)).getProducts()) {
                 updatedProductStrings.add(p.toString());
             }
-
-            writeAllToFile("ProductCategories/" + existingCategory.getName() + ".txt", updatedProductStrings);
+            writeAllToFile("ProductCategories/" + Objects.requireNonNull(returnCategoryByProduct(toUpdate)).getName() + ".txt", updatedProductStrings);
         }
         else {
             System.out.println("Product does not exist, cannot update product");
@@ -424,7 +421,11 @@ public class Main extends JFrame {
     }
 
     private void updateCategoryList() {
-        String[] categoryList = categoryNames.toArray(new String[0]);
+        String[] categoryList = new String[categoryNames.size() + 1];
+        categoryList[0] = "All Categories";
+        for (int i = 0; i < categoryNames.size(); i++) {
+            categoryList[i + 1] = categoryNames.get(i);
+        }
         goodsGroupList.setListData(categoryList);
     }
 
@@ -471,7 +472,7 @@ public class Main extends JFrame {
         // Updating Category List
         addCategoryName();
 
-        Category[] selectedCateg = {null};
+
         String[] categoryList = new String[categoryNames.size() + 1];
         categoryList[0] = "All Categories";
         for (int i = 0; i < categoryNames.size(); i++) {
@@ -485,77 +486,7 @@ public class Main extends JFrame {
         goodsGroupList.addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent e) {
                 if (!e.getValueIsAdjusting()) {
-                    String selected = (String) goodsGroupList.getSelectedValue();
-                    if (selected == null) return;
-
-                    if (selected.equals("All Categories")) {
-                        selectedCateg[0] = null;
-                        ArrayList<Product> allProducts = new ArrayList<>();
-                        for (Category c : categories) {
-                            allProducts.addAll(c.getProducts());
-                        }
-                        String[][] data = new String[allProducts.size()][5];
-                        for (int i = 0; i < allProducts.size(); i++) {
-                            Product p = allProducts.get(i);
-                            data[i][0] = p.getName();
-                            data[i][1] = p.getDescription();
-                            data[i][2] = p.getProducer();
-                            data[i][3] = String.valueOf(p.getAmountInStock());
-                            data[i][4] = String.valueOf(p.getPrice());
-                        }
-                        String[] property = {"Name", "Description", "Producer", "Remained", "Price per piece"};
-                        DefaultTableModel model = new DefaultTableModel(data, property) {
-                            public boolean isCellEditable(int row, int column) {
-                                return false;
-                            }
-                        };
-                        goodsArea.setModel(model);
-
-                        categoryStatisticsText.setText("All categories");
-                    }
-
-                    // Searching for a category
-                    Category selectedCategory = null;
-                    for (Category c : categories) {
-                        if (c.getName().equals(selected)) {
-                            selectedCategory = c;
-                            selectedCateg[0] = c;
-                            break;
-                        }
-                    }
-
-                    if (selectedCategory != null) {
-                        ArrayList<Product> products = selectedCategory.getProducts();
-
-                        // Collecting goods for showing in the table
-                        String[][] data = new String[products.size()][5];
-                        for (int i = 0; i < products.size(); i++) {
-                            Product p = products.get(i);
-                            data[i][0] = p.getName();
-                            data[i][1] = p.getDescription();
-                            data[i][2] = p.getProducer();
-                            data[i][3] = String.valueOf(p.getAmountInStock());
-                            data[i][4] = String.valueOf(p.getPrice());
-                        }
-
-                        // Updating the table
-                        String[] property = {"Name", "Description", "Producer", "Remained", "Price per piece"};
-                        DefaultTableModel model = new DefaultTableModel(data, property) {
-                            public boolean isCellEditable(int row, int column) {
-                                return false;
-                            }
-                        };
-                        goodsArea.setModel(model);
-
-                        double totalCategoryCost = 0;
-                        for(Product p : selectedCategory.getProducts()) {
-                            totalCategoryCost += p.getAmountInStock() * p.getPrice();
-                        }
-                        totalCategoryCostRounded = Math.round(totalCategoryCost * 100.0) / 100.0;
-
-                        categoryStatisticsText.setText("The Category description:" + selectedCategory.getDescription()
-                                + "\n\nTotal cost of the goods in the category: " + totalCategoryCostRounded);
-                    }
+                    refreshGoodsTable();
                 }
             }
         });
@@ -980,7 +911,7 @@ public class Main extends JFrame {
 
     private void showRedactNameWindow() {
         JFrame redactNameFrame = new JFrame("Redact Name");
-        redactNameFrame.setSize(400, 350);
+        redactNameFrame.setSize(400, 270);
         redactNameFrame.setLayout(null);
 
         JLabel titleField = new JLabel("Redact Product");
@@ -988,50 +919,38 @@ public class Main extends JFrame {
         titleField.setBounds(90, 10, 250, 50);
         redactNameFrame.add(titleField);
 
-        JTextField categoryField = new JTextField();
-        categoryField.setBounds(150, 65, 200, 35);
-        redactNameFrame.add(categoryField);
         JTextField nameField = new JTextField();
-        nameField.setBounds(150, 125, 200, 35);
+        nameField.setBounds(150, 65, 200, 35);
         redactNameFrame.add(nameField);
         JTextField newNameField = new JTextField();
-        newNameField.setBounds(150, 185, 200, 35);
+        newNameField.setBounds(150, 125, 200, 35);
         redactNameFrame.add(newNameField);
 
-        JLabel categoryLabel = new JLabel("Category:");
-        categoryLabel.setBounds(25, 50, 185, 65);
-        redactNameFrame.add(categoryLabel);
 
         JLabel nameLabel = new JLabel("Product Name:");
-        nameLabel.setBounds(25, 110, 185, 65);
+        nameLabel.setBounds(25, 50, 185, 65);
         redactNameFrame.add(nameLabel);
 
         JLabel newNameLabel = new JLabel("New Product Name:");
-        newNameLabel.setBounds(25, 170, 185, 65);
+        newNameLabel.setBounds(25, 110, 185, 65);
         redactNameFrame.add(newNameLabel);
 
         JButton redactButton = new JButton("Redact");
-        redactButton.setBounds(30, 250, 150, 30);
+        redactButton.setBounds(30, 180, 150, 30);
         redactNameFrame.add(redactButton);
         redactButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
-                    String categoryName = categoryField.getText();
                     String name = nameField.getText();
                     String newName = newNameField.getText();
-
-                    Category checkCategory = returnCategoryByName(categoryName);
-                    if (checkCategory != null) {
-                        Product productToUpdate = returnProductByName(checkCategory.getProducts(), name);
+                        Product productToUpdate = returnProductByName(name);
                         if (productToUpdate != null) {
-                            updateProductData(productToUpdate, checkCategory, newName, productToUpdate.getDescription(), productToUpdate.getProducer(), productToUpdate.getAmountInStock(), productToUpdate.getPrice());
+                            updateProductData(productToUpdate, returnCategoryByProduct(productToUpdate), newName, productToUpdate.getDescription(), productToUpdate.getProducer(), productToUpdate.getAmountInStock(), productToUpdate.getPrice());
+                            refreshGoodsTable();
                             JOptionPane.showMessageDialog(redactProductFrame, "Product name updated successfully");
                         } else {
                             JOptionPane.showMessageDialog(redactProductFrame, "Product not found");
                         }
-                    } else {
-                        JOptionPane.showMessageDialog(redactProductFrame, "Category not found");
-                    }
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(redactNameFrame, "Error: " + ex.getMessage());
                 }
@@ -1039,7 +958,7 @@ public class Main extends JFrame {
         });
 
         JButton cancelButton = new JButton("Cancel");
-        cancelButton.setBounds(200, 250, 150, 30);
+        cancelButton.setBounds(200, 180, 150, 30);
         cancelButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 redactNameFrame.dispose();
@@ -1052,7 +971,7 @@ public class Main extends JFrame {
 
     private void showRedactDescriptionWindow() {
         JFrame redactDescriptionFrame = new JFrame("Redact Description");
-        redactDescriptionFrame.setSize(400, 350);
+        redactDescriptionFrame.setSize(400, 270);
         redactDescriptionFrame.setLayout(null);
 
         JLabel titleField = new JLabel("Redact Product");
@@ -1060,50 +979,39 @@ public class Main extends JFrame {
         titleField.setBounds(90, 10, 250, 50);
         redactDescriptionFrame.add(titleField);
 
-        JTextField categoryField = new JTextField();
-        categoryField.setBounds(150, 65, 200, 35);
-        redactDescriptionFrame.add(categoryField);
         JTextField nameField = new JTextField();
-        nameField.setBounds(150, 125, 200, 35);
+        nameField.setBounds(150, 65, 200, 35);
         redactDescriptionFrame.add(nameField);
         JTextField newDescrField = new JTextField();
-        newDescrField.setBounds(180, 185, 170, 35);
+        newDescrField.setBounds(180, 125, 170, 35);
         redactDescriptionFrame.add(newDescrField);
 
-        JLabel categoryLabel = new JLabel("Category:");
-        categoryLabel.setBounds(25, 50, 185, 65);
-        redactDescriptionFrame.add(categoryLabel);
 
         JLabel nameLabel = new JLabel("Product Name:");
-        nameLabel.setBounds(25, 110, 185, 65);
+        nameLabel.setBounds(25, 50, 185, 65);
         redactDescriptionFrame.add(nameLabel);
 
         JLabel newNameLabel = new JLabel("New Product Description:");
-        newNameLabel.setBounds(25, 170, 185, 65);
+        newNameLabel.setBounds(25, 110, 185, 65);
         redactDescriptionFrame.add(newNameLabel);
 
         JButton redactButton = new JButton("Redact");
-        redactButton.setBounds(30, 250, 150, 30);
+        redactButton.setBounds(30, 180, 150, 30);
         redactDescriptionFrame.add(redactButton);
         redactButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
-                    String categoryName = categoryField.getText();
                     String name = nameField.getText();
                     String newDescription = newDescrField.getText();
 
-                    Category checkCategory = returnCategoryByName(categoryName);
-                    if (checkCategory != null) {
-                        Product productToUpdate = returnProductByName(checkCategory.getProducts(), name);
+                        Product productToUpdate = returnProductByName(name);
                         if (productToUpdate != null) {
-                            updateProductData(productToUpdate, checkCategory, productToUpdate.getName(), newDescription, productToUpdate.getProducer(), productToUpdate.getAmountInStock(), productToUpdate.getPrice());
+                            updateProductData(productToUpdate, returnCategoryByProduct(productToUpdate), productToUpdate.getName(), newDescription, productToUpdate.getProducer(), productToUpdate.getAmountInStock(), productToUpdate.getPrice());
+                            refreshGoodsTable();
                             JOptionPane.showMessageDialog(redactProductFrame, "Product description updated successfully");
                         } else {
                             JOptionPane.showMessageDialog(redactProductFrame, "Product not found");
                         }
-                    } else {
-                        JOptionPane.showMessageDialog(redactProductFrame, "Category not found");
-                    }
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(redactDescriptionFrame, "Error: " + ex.getMessage());
                 }
@@ -1111,7 +1019,7 @@ public class Main extends JFrame {
         });
 
         JButton cancelButton = new JButton("Cancel");
-        cancelButton.setBounds(200, 250, 150, 30);
+        cancelButton.setBounds(200, 180, 150, 30);
         cancelButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 redactDescriptionFrame.dispose();
@@ -1166,10 +1074,11 @@ public class Main extends JFrame {
 
                     Category checkCategory = returnCategoryByName(categoryName);
                     if (checkCategory != null) {
-                        Product productToUpdate = returnProductByName(checkCategory.getProducts(), name);
+                        Product productToUpdate = returnProductByName(name);
                         if (productToUpdate != null) {
                             updateProductData(productToUpdate, checkCategory, productToUpdate.getName(), productToUpdate.getDescription(), productToUpdate.getProducer(), newAmount, productToUpdate.getPrice());
                             updateGeneralStatistics();
+                            refreshGoodsTable();
                             JOptionPane.showMessageDialog(redactProductFrame, "Product amount updated successfully");
                         } else {
                             JOptionPane.showMessageDialog(redactProductFrame, "Product not found");
@@ -1184,6 +1093,7 @@ public class Main extends JFrame {
             }
         });
 
+
         JButton cancelButton = new JButton("Cancel");
         cancelButton.setBounds(200, 250, 150, 30);
         cancelButton.addActionListener(new ActionListener() {
@@ -1194,11 +1104,12 @@ public class Main extends JFrame {
         redactAmountFrame.add(cancelButton);
 
         redactAmountFrame.setVisible(true);
+
     }
 
     private void showRedactPriceWindow() {
         JFrame redactAmountFrame = new JFrame("Redact Price");
-        redactAmountFrame.setSize(400, 350);
+        redactAmountFrame.setSize(400, 270);
         redactAmountFrame.setLayout(null);
 
         JLabel titleField = new JLabel("Redact Product");
@@ -1206,51 +1117,43 @@ public class Main extends JFrame {
         titleField.setBounds(90, 10, 250, 50);
         redactAmountFrame.add(titleField);
 
-        JTextField categoryField = new JTextField();
-        categoryField.setBounds(150, 65, 200, 35);
-        redactAmountFrame.add(categoryField);
+
         JTextField nameField = new JTextField();
-        nameField.setBounds(150, 125, 200, 35);
+        nameField.setBounds(150, 65, 200, 35);
         redactAmountFrame.add(nameField);
         JTextField newPriceField = new JTextField();
-        newPriceField.setBounds(150, 185, 200, 35);
+        newPriceField.setBounds(150, 125, 200, 35);
         redactAmountFrame.add(newPriceField);
 
-        JLabel categoryLabel = new JLabel("Category:");
-        categoryLabel.setBounds(25, 50, 185, 65);
-        redactAmountFrame.add(categoryLabel);
-
         JLabel nameLabel = new JLabel("Product Name:");
-        nameLabel.setBounds(25, 110, 185, 65);
+        nameLabel.setBounds(25, 50, 185, 65);
         redactAmountFrame.add(nameLabel);
 
         JLabel newNameLabel = new JLabel("New Product Price:");
-        newNameLabel.setBounds(25, 170, 185, 65);
+        newNameLabel.setBounds(25, 110, 185, 65);
         redactAmountFrame.add(newNameLabel);
 
         JButton redactButton = new JButton("Redact");
-        redactButton.setBounds(30, 250, 150, 30);
+        redactButton.setBounds(30, 180, 150, 30);
         redactAmountFrame.add(redactButton);
         redactButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
-                    String categoryName = categoryField.getText();
                     String name = nameField.getText();
                     double newPrice = Double.parseDouble(newPriceField.getText());
 
-                    Category checkCategory = returnCategoryByName(categoryName);
-                    if (checkCategory != null) {
-                        Product productToUpdate = returnProductByName(checkCategory.getProducts(), name);
-                        if (productToUpdate != null) {
-                            updateProductData(productToUpdate, checkCategory, productToUpdate.getName(), productToUpdate.getDescription(), productToUpdate.getProducer(), productToUpdate.getAmountInStock(), newPrice);
+                        Product productToUpdate = returnProductByName(name);
+                        if (productToUpdate != null && newPrice > 0) {
+                            updateProductData(productToUpdate, returnCategoryByProduct(productToUpdate), productToUpdate.getName(), productToUpdate.getDescription(), productToUpdate.getProducer(), productToUpdate.getAmountInStock(), newPrice);
                             updateGeneralStatistics();
+                            refreshGoodsTable();
                             JOptionPane.showMessageDialog(redactProductFrame, "Product price updated successfully");
-                        } else {
+                        } else if (newPrice <= 0) {
+                            JOptionPane.showMessageDialog(redactProductFrame, "Price cannot be less than 0!");
+                        }
+                        else {
                             JOptionPane.showMessageDialog(redactProductFrame, "Product not found");
                         }
-                    } else {
-                        JOptionPane.showMessageDialog(redactProductFrame, "Category not found");
-                    }
 
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(redactAmountFrame, "Error: " + ex.getMessage());
@@ -1259,7 +1162,7 @@ public class Main extends JFrame {
         });
 
         JButton cancelButton = new JButton("Cancel");
-        cancelButton.setBounds(200, 250, 150, 30);
+        cancelButton.setBounds(200, 180, 150, 30);
         cancelButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 redactAmountFrame.dispose();
@@ -1272,7 +1175,7 @@ public class Main extends JFrame {
 
     private void showRedactProducerWindow() {
         JFrame redactProducerFrame = new JFrame("Redact Producer");
-        redactProducerFrame.setSize(400, 350);
+        redactProducerFrame.setSize(400, 270);
         redactProducerFrame.setLayout(null);
 
         JLabel titleField = new JLabel("Redact Product");
@@ -1280,50 +1183,39 @@ public class Main extends JFrame {
         titleField.setBounds(90, 10, 250, 50);
         redactProducerFrame.add(titleField);
 
-        JTextField categoryField = new JTextField();
-        categoryField.setBounds(150, 65, 200, 35);
-        redactProducerFrame.add(categoryField);
         JTextField nameField = new JTextField();
-        nameField.setBounds(150, 125, 200, 35);
+        nameField.setBounds(150, 65, 200, 35);
         redactProducerFrame.add(nameField);
         JTextField newProducerField = new JTextField();
-        newProducerField.setBounds(180, 185, 170, 35);
+        newProducerField.setBounds(180, 125, 170, 35);
         redactProducerFrame.add(newProducerField);
 
-        JLabel categoryLabel = new JLabel("Category:");
-        categoryLabel.setBounds(25, 50, 185, 65);
-        redactProducerFrame.add(categoryLabel);
 
         JLabel nameLabel = new JLabel("Product Name:");
-        nameLabel.setBounds(25, 110, 185, 65);
+        nameLabel.setBounds(25, 50, 185, 65);
         redactProducerFrame.add(nameLabel);
 
         JLabel newNameLabel = new JLabel("New Product Producer:");
-        newNameLabel.setBounds(25, 170, 185, 65);
+        newNameLabel.setBounds(25, 110, 185, 65);
         redactProducerFrame.add(newNameLabel);
 
         JButton redactButton = new JButton("Redact");
-        redactButton.setBounds(30, 250, 150, 30);
+        redactButton.setBounds(30, 180, 150, 30);
         redactProducerFrame.add(redactButton);
         redactButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
-                    String categoryName = categoryField.getText();
                     String name = nameField.getText();
                     String newProducer = newProducerField.getText();
 
-                    Category checkCategory = returnCategoryByName(categoryName);
-                    if (checkCategory != null) {
-                        Product productToUpdate = returnProductByName(checkCategory.getProducts(), name);
+                        Product productToUpdate = returnProductByName(name);
                         if (productToUpdate != null) {
-                            updateProductData(productToUpdate, checkCategory, productToUpdate.getName(), productToUpdate.getDescription(), newProducer, productToUpdate.getAmountInStock(), productToUpdate.getPrice());
+                            updateProductData(productToUpdate, returnCategoryByProduct(productToUpdate), productToUpdate.getName(), productToUpdate.getDescription(), newProducer, productToUpdate.getAmountInStock(), productToUpdate.getPrice());
+                            refreshGoodsTable();
                             JOptionPane.showMessageDialog(redactProductFrame, "Product producer updated successfully");
                         } else {
                             JOptionPane.showMessageDialog(redactProductFrame, "Product not found");
                         }
-                    } else {
-                        JOptionPane.showMessageDialog(redactProductFrame, "Category not found");
-                    }
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(redactProducerFrame, "Error: " + ex.getMessage());
                 }
@@ -1331,7 +1223,7 @@ public class Main extends JFrame {
         });
 
         JButton cancelButton = new JButton("Cancel");
-        cancelButton.setBounds(200, 250, 150, 30);
+        cancelButton.setBounds(200, 180, 150, 30);
         cancelButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 redactProducerFrame.dispose();
@@ -1417,10 +1309,14 @@ public class Main extends JFrame {
                     String desc = descField.getText();
 
                     Category checkCategory = returnCategoryByName(name);
-                    if(checkCategory == null) {
+                    if(checkCategory == null && !name.equalsIgnoreCase("All Categories")) {
                         Category categoryToAdd = new Category(name, desc);
                         if(categoryToAdd.getName().isEmpty()) {
                             JOptionPane.showMessageDialog(addCategoryFrame, "Enter the name of the Category");
+                            return;
+                        }
+                        if (categoryToAdd.getDescription().isEmpty()) {
+                            JOptionPane.showMessageDialog(addCategoryFrame, "Enter the description of the Category");
                             return;
                         }
                         addCategory(categoryToAdd);
@@ -1431,7 +1327,12 @@ public class Main extends JFrame {
                         addCategoryName();
                         updateCategoryList();
         //              addCategoryFrame.dispose();
-                    } else {
+                    } else if (name.equalsIgnoreCase("All Categories")) {
+                        JOptionPane.showMessageDialog(addCategoryFrame, "Name \"All Categories\" reserved!");
+                        nameField.setText("");
+                        descField.setText("");
+                    }
+                    else {
                         JOptionPane.showMessageDialog(addCategoryFrame, "Category already exists!");
                         nameField.setText("");
                         descField.setText("");
@@ -1522,12 +1423,20 @@ public class Main extends JFrame {
 
                     Category checkCategory = returnCategoryByName(categoryName);
                     if (checkCategory != null) {
-                        if(!productExists(checkCategory, name)) {
+                        if(!productExists(checkCategory, name) && !returnAllCategoryProductNames().contains(name) && amount >= 0 && price > 0) {
                             Product p = new Product(name, desc, producer, amount, price);
                             addProduct(p, checkCategory);
                             updateGeneralStatistics();
+                            refreshGoodsTable();
                             JOptionPane.showMessageDialog(addProductFrame, "Product added successfully!");
-                        } else {
+                        }
+                        else if (amount < 0) {
+                            JOptionPane.showMessageDialog(addProductFrame, "Ammount cannot be negative!");
+                        }
+                        else if (price <= 0) {
+                            JOptionPane.showMessageDialog(addProductFrame, "Price cannot be less than 0!");
+                        }
+                        else {
                             JOptionPane.showMessageDialog(addProductFrame, "Product already exists!");
                         }
                     } else {
@@ -1620,6 +1529,7 @@ public class Main extends JFrame {
                         nameField.setText("");
                         addCategoryName();
                         updateCategoryList();
+                        goodsArea.setVisible(false);
                         //              addCategoryFrame.dispose();
                     } else {
                         JOptionPane.showMessageDialog(removeCategoryFrame, "Category not found");
@@ -1645,13 +1555,11 @@ public class Main extends JFrame {
 
     private void showRemoveProductWindow() {
         removeProductFrame = new JFrame("Write-off Product");
-        removeProductFrame.setSize(400, 270);
+        removeProductFrame.setSize(400, 220);
         removeProductFrame.setLayout(null);
 
         JTextField nameField = new JTextField();
         nameField.setBounds(130, 65, 220, 35);
-        JTextField categoryField = new JTextField();
-        categoryField.setBounds(130, 125, 220, 35);
 
         JLabel titleField = new JLabel("Write-off Product");
         titleField.setFont(new Font("Arial", Font.PLAIN, 28));
@@ -1663,33 +1571,24 @@ public class Main extends JFrame {
         removeProductFrame.add(nameLabel);
         removeProductFrame.add(nameField);
 
-        JLabel categoryLabel = new JLabel("Category Name:");
-        categoryLabel.setBounds(25, 110, 185, 65);
-        removeProductFrame.add(categoryLabel);
-        removeProductFrame.add(categoryField);
 
         JButton addButton = new JButton("Write-off Product");
-        addButton.setBounds(30, 180, 150, 30);
+        addButton.setBounds(30, 120, 150, 30);
         removeProductFrame.add(addButton);
         addButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     String productName = nameField.getText();
-                    String categoryName = categoryField.getText();
 
-                    Category checkCategory = returnCategoryByName(categoryName);
-                    if(checkCategory != null) {
-                        Product checkProduct = returnProductByName(checkCategory.getProducts() ,productName);
+                        Product checkProduct = returnProductByName(productName);
                         if(checkProduct != null) {
-                            deleteProduct(checkProduct, checkCategory);
+                            deleteProduct(checkProduct);
                             updateGeneralStatistics();
+                            refreshGoodsTable();
                             JOptionPane.showMessageDialog(removeProductFrame, "Product removed successfully!");
                         } else {
                             JOptionPane.showMessageDialog(removeProductFrame, "Product not found");
                         }
-                    } else {
-                        JOptionPane.showMessageDialog(redactProductFrame, "Category not found");
-                    }
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(removeProductFrame, "Error: " + ex.getMessage());
                 }
@@ -1697,7 +1596,7 @@ public class Main extends JFrame {
         });
 
         JButton cancelButton = new JButton("Cancel");
-        cancelButton.setBounds(200, 180, 150, 30);
+        cancelButton.setBounds(200, 120, 150, 30);
         cancelButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 removeProductFrame.dispose();
@@ -1794,6 +1693,80 @@ public class Main extends JFrame {
         searchFrame.add(searchButton);
 
         searchFrame.setVisible(true);
+    }
+    private void refreshGoodsTable() {
+        goodsArea.setVisible(true);
+        String selected = (String) goodsGroupList.getSelectedValue();
+        if (selected == null) return;
+
+        if (selected.equals("All Categories")) {
+            selectedCateg[0] = null;
+            ArrayList<Product> allProducts = new ArrayList<>();
+            for (Category c : categories) {
+                allProducts.addAll(c.getProducts());
+            }
+            String[][] data = new String[allProducts.size()][5];
+            for (int i = 0; i < allProducts.size(); i++) {
+                Product p = allProducts.get(i);
+                data[i][0] = p.getName();
+                data[i][1] = p.getDescription();
+                data[i][2] = p.getProducer();
+                data[i][3] = String.valueOf(p.getAmountInStock());
+                data[i][4] = String.valueOf(p.getPrice());
+            }
+            String[] property = {"Name", "Description", "Producer", "Remained", "Price per piece"};
+            DefaultTableModel model = new DefaultTableModel(data, property) {
+                public boolean isCellEditable(int row, int column) {
+                    return false;
+                }
+            };
+            goodsArea.setModel(model);
+
+            categoryStatisticsText.setText("All categories");
+        }
+
+        // Searching for a category
+        Category selectedCategory = null;
+        for (Category c : categories) {
+            if (c.getName().equals(selected)) {
+                selectedCategory = c;
+                selectedCateg[0] = c;
+                break;
+            }
+        }
+
+        if (selectedCategory != null) {
+            ArrayList<Product> products = selectedCategory.getProducts();
+
+            // Collecting goods for showing in the table
+            String[][] data = new String[products.size()][5];
+            for (int i = 0; i < products.size(); i++) {
+                Product p = products.get(i);
+                data[i][0] = p.getName();
+                data[i][1] = p.getDescription();
+                data[i][2] = p.getProducer();
+                data[i][3] = String.valueOf(p.getAmountInStock());
+                data[i][4] = String.valueOf(p.getPrice());
+            }
+
+            // Updating the table
+            String[] property = {"Name", "Description", "Producer", "Remained", "Price per piece"};
+            DefaultTableModel model = new DefaultTableModel(data, property) {
+                public boolean isCellEditable(int row, int column) {
+                    return false;
+                }
+            };
+            goodsArea.setModel(model);
+
+            double totalCategoryCost = 0;
+            for(Product p : selectedCategory.getProducts()) {
+                totalCategoryCost += p.getAmountInStock() * p.getPrice();
+            }
+            totalCategoryCostRounded = Math.round(totalCategoryCost * 100.0) / 100.0;
+
+            categoryStatisticsText.setText("The Category description:" + selectedCategory.getDescription()
+                    + "\n\nTotal cost of the goods in the category: " + totalCategoryCostRounded);
+        }
     }
 
     public static void main(String[] args) {
