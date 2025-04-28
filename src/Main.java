@@ -57,7 +57,7 @@ public class Main extends JFrame {
 
     public static void addCategory(Category category) {
         ArrayList<String> existingCategories = readFromFile("src/Categories.txt");
-        if (!existingCategories.contains(category.toString())) {
+        if (!existingCategories.contains(category.toString()) && !category.getName().equalsIgnoreCase("All Categories")) {
             categories.add(category);
             appendToFile("src/Categories.txt", category.toString());
 
@@ -424,7 +424,11 @@ public class Main extends JFrame {
     }
 
     private void updateCategoryList() {
-        String[] categoryList = categoryNames.toArray(new String[0]);
+        String[] categoryList = new String[categoryNames.size() + 1];
+        categoryList[0] = "All Categories";
+        for (int i = 0; i < categoryNames.size(); i++) {
+            categoryList[i + 1] = categoryNames.get(i);
+        }
         goodsGroupList.setListData(categoryList);
     }
 
@@ -1417,7 +1421,7 @@ public class Main extends JFrame {
                     String desc = descField.getText();
 
                     Category checkCategory = returnCategoryByName(name);
-                    if(checkCategory == null) {
+                    if(checkCategory == null && !name.equalsIgnoreCase("All Categories")) {
                         Category categoryToAdd = new Category(name, desc);
                         if(categoryToAdd.getName().isEmpty()) {
                             JOptionPane.showMessageDialog(addCategoryFrame, "Enter the name of the Category");
@@ -1431,7 +1435,12 @@ public class Main extends JFrame {
                         addCategoryName();
                         updateCategoryList();
         //              addCategoryFrame.dispose();
-                    } else {
+                    } else if (name.equalsIgnoreCase("All Categories")) {
+                        JOptionPane.showMessageDialog(addCategoryFrame, "Name \"All Categories\" reserved!");
+                        nameField.setText("");
+                        descField.setText("");
+                    }
+                    else {
                         JOptionPane.showMessageDialog(addCategoryFrame, "Category already exists!");
                         nameField.setText("");
                         descField.setText("");
