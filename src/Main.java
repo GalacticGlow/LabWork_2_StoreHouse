@@ -601,6 +601,91 @@ public class Main extends JFrame {
         redactCategoryFrame.setVisible(true);
     }
 
+    private void showRedactCategoryNameWindow() {
+        JFrame redactCategoryNameFrame = new JFrame("Redact Category Name");
+        redactCategoryNameFrame.setSize(400, 270);
+        redactCategoryNameFrame.setResizable(false);
+        redactCategoryNameFrame.setLayout(null);
+        redactCategoryNameFrame.setLocationRelativeTo(null);
+
+        JLabel titleField = new JLabel("Redact Category");
+        titleField.setFont(new Font("Arial", Font.PLAIN, 28));
+        titleField.setBounds(90, 10, 250, 50);
+        redactCategoryNameFrame.add(titleField);
+
+        JTextField nameField = new JTextField();
+        nameField.setBounds(150, 65, 200, 35);
+        JTextField newNameField = new JTextField();
+        newNameField.setBounds(150, 125, 200, 35);
+
+        JLabel nameLabel = new JLabel("Category Name:");
+        nameLabel.setBounds(25, 50, 185, 65);
+        redactCategoryNameFrame.add(nameLabel);
+        redactCategoryNameFrame.add(nameField);
+
+        JLabel newNameLabel = new JLabel("New Category Name:");
+        newNameLabel.setBounds(25, 110, 185, 65);
+        redactCategoryNameFrame.add(newNameLabel);
+        redactCategoryNameFrame.add(newNameField);
+
+        JButton addButton = new JButton("Redact");
+        addButton.setBounds(30, 180, 150, 30);
+        redactCategoryNameFrame.add(addButton);
+        addButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String categoryName = nameField.getText();
+                    String categoryNewName = newNameField.getText();
+                    Category categoryToUpdate = returnCategoryByName(categoryName);
+                    boolean duplicateCategory = false;
+                    for(Category c : categories) {
+                        if (categoryNewName.equalsIgnoreCase(c.getName())) {
+                            duplicateCategory = true;
+                            break;
+                        }
+                    }
+                    if (categoryNewName.equalsIgnoreCase("All Categories")) {
+                        JOptionPane.showMessageDialog(redactCategoryNameFrame, "Name \"All Categories\" reserved!");
+                        return;
+                    }
+                    if(categoryToUpdate != null && !duplicateCategory && !categoryNewName.isEmpty()) {
+                        updateCategoryName(categoryToUpdate, categoryNewName);
+                        JOptionPane.showMessageDialog(redactCategoryNameFrame, "Category name updated successfully");
+                        addCategoryName();
+                        updateCategoryList();
+                        updateCategoryList();
+                        nameField.setText("");
+                        newNameField.setText("");
+                    }
+                    else if (duplicateCategory) {
+                        JOptionPane.showMessageDialog(redactCategoryNameFrame, "Category name already exists!");
+                    }
+                    else if (!categoryNewName.isEmpty()) {
+                        JOptionPane.showMessageDialog(redactCategoryNameFrame, "Category name cannot be empty!");
+                    }
+                    else {
+                        JOptionPane.showMessageDialog(redactCategoryNameFrame, "Category not found");
+                        nameField.setText("");
+                        newNameField.setText("");
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(redactCategoryNameFrame, "Error: " + ex.getMessage());
+                }
+            }
+        });
+
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.setBounds(200, 180, 150, 30);
+        cancelButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                redactCategoryNameFrame.dispose();
+            }
+        });
+        redactCategoryNameFrame.add(cancelButton);
+
+        redactCategoryNameFrame.setVisible(true);
+    }
+
     private void showRedactCategoryDescriptionWindow() {
         JFrame redactCategoryDescrFrame = new JFrame("Redact Category Description");
         redactCategoryDescrFrame.setSize(400, 270);
@@ -670,87 +755,6 @@ public class Main extends JFrame {
         redactCategoryDescrFrame.add(cancelButton);
 
         redactCategoryDescrFrame.setVisible(true);
-    }
-
-    private void showRedactCategoryNameWindow() {
-        JFrame redactCategoryNameFrame = new JFrame("Redact Category Name");
-        redactCategoryNameFrame.setSize(400, 270);
-        redactCategoryNameFrame.setResizable(false);
-        redactCategoryNameFrame.setLayout(null);
-        redactCategoryNameFrame.setLocationRelativeTo(null);
-
-        JLabel titleField = new JLabel("Redact Category");
-        titleField.setFont(new Font("Arial", Font.PLAIN, 28));
-        titleField.setBounds(90, 10, 250, 50);
-        redactCategoryNameFrame.add(titleField);
-
-        JTextField nameField = new JTextField();
-        nameField.setBounds(150, 65, 200, 35);
-        JTextField newNameField = new JTextField();
-        newNameField.setBounds(150, 125, 200, 35);
-
-        JLabel nameLabel = new JLabel("Category Name:");
-        nameLabel.setBounds(25, 50, 185, 65);
-        redactCategoryNameFrame.add(nameLabel);
-        redactCategoryNameFrame.add(nameField);
-
-        JLabel newNameLabel = new JLabel("New Category Name:");
-        newNameLabel.setBounds(25, 110, 185, 65);
-        redactCategoryNameFrame.add(newNameLabel);
-        redactCategoryNameFrame.add(newNameField);
-
-        JButton addButton = new JButton("Redact");
-        addButton.setBounds(30, 180, 150, 30);
-        redactCategoryNameFrame.add(addButton);
-        addButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    String categoryName = nameField.getText();
-                    String categoryNewName = newNameField.getText();
-                    Category categoryToUpdate = returnCategoryByName(categoryName);
-                    boolean duplicateCategory = false;
-                    for(Category c : categories) {
-                            if (categoryNewName.equalsIgnoreCase(c.getName())) {
-                                duplicateCategory = true;
-                                break;
-                            }
-                        }
-                    if(categoryToUpdate != null && !duplicateCategory && !categoryNewName.isEmpty()) {
-                        updateCategoryName(categoryToUpdate, categoryNewName);
-                        JOptionPane.showMessageDialog(redactCategoryNameFrame, "Category name updated successfully");
-                        addCategoryName();
-                        updateCategoryList();
-                        updateCategoryList();
-                        nameField.setText("");
-                        newNameField.setText("");
-                    }
-                    else if (duplicateCategory) {
-                        JOptionPane.showMessageDialog(redactCategoryNameFrame, "Category name already exists!");
-                    }
-                    else if (!categoryNewName.isEmpty()) {
-                        JOptionPane.showMessageDialog(redactCategoryNameFrame, "Category name cannot be empty!");
-                    }
-                    else {
-                        JOptionPane.showMessageDialog(redactCategoryNameFrame, "Category not found");
-                        nameField.setText("");
-                        newNameField.setText("");
-                    }
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(redactCategoryNameFrame, "Error: " + ex.getMessage());
-                }
-            }
-        });
-
-        JButton cancelButton = new JButton("Cancel");
-        cancelButton.setBounds(200, 180, 150, 30);
-        cancelButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                redactCategoryNameFrame.dispose();
-            }
-        });
-        redactCategoryNameFrame.add(cancelButton);
-
-        redactCategoryNameFrame.setVisible(true);
     }
 
     private void showRedactProductWindow() {
@@ -1263,14 +1267,17 @@ public class Main extends JFrame {
                     String newProducer = newProducerField.getText();
 
                         Product productToUpdate = returnProductByName(name);
-                        if (productToUpdate != null && !newProducer.isEmpty()) {
+                        if (productToUpdate != null && !newProducer.isEmpty() && !name.isEmpty()) {
                             updateProductData(productToUpdate, returnCategoryByProduct(productToUpdate), productToUpdate.getName(), productToUpdate.getDescription(), newProducer, productToUpdate.getAmountInStock(), productToUpdate.getPrice());
                             refreshGoodsTable();
                             JOptionPane.showMessageDialog(redactProductFrame, "Product producer updated successfully");
                         }
-                        else if (newProducer.isEmpty()) {
-                            JOptionPane.showMessageDialog(redactProductFrame, "New producer cannot be empty!");
+                        else if (name.isEmpty()) {
+                            JOptionPane.showMessageDialog(redactProductFrame, "Product name cannot be empty!");
                         }
+                        else if (newProducer.isEmpty()) {
+                                JOptionPane.showMessageDialog(redactProductFrame, "New producer cannot be empty!");
+                            }
                         else {
                             JOptionPane.showMessageDialog(redactProductFrame, "Product not found");
                         }
