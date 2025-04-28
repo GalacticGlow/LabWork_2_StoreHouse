@@ -111,9 +111,6 @@ public class Main extends JFrame {
     }
 
     public static void updateCategoryName(Category category, String newName) {
-        for (Category c : categories) {
-            if (c.getName().equalsIgnoreCase(category.getName())) {}
-        }
         if (categories.contains(category)) {
             String oldName = category.getName();
 
