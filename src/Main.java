@@ -522,6 +522,7 @@ public class Main extends JFrame {
                         Object amountInRow = goodsArea.getValueAt(selectedRow, 3);
                         Object priceInRow = goodsArea.getValueAt(selectedRow, 4);
 
+
                         int amount = Integer.parseInt(amountInRow.toString());
                         double price = Double.parseDouble(priceInRow.toString());
 
@@ -1817,9 +1818,9 @@ public class Main extends JFrame {
         searchLabel.setFont(new Font("Arial", Font.BOLD, 28));
         searchLabel.setBounds(245, 7, 185, 40);
 
-        // Creating the array for ComboBox of categories
         ArrayList<String> categoriesNames = new ArrayList<>();
-        for(Category categName : categories) {
+        categoriesNames.add("All Categories");
+        for (Category categName : categories) {
             categoriesNames.add(categName.getName());
         }
         String[] categoriesArray = categoriesNames.toArray(new String[0]);
@@ -1855,16 +1856,24 @@ public class Main extends JFrame {
                 String selectedCategory = (String) categoriesComboBox.getSelectedItem();
                 String searchQuery = searchField.getText();
 
-                // Searching for a category
-                Category checkCategory = returnCategoryByName(selectedCategory);
+                if ("All Categories".equals(selectedCategory)) {
+                    ArrayList<Product> allProducts = new ArrayList<>();
+                    for (Category category : categories) {
+                        allProducts.addAll(category.getProducts());
+                    }
 
-                if (checkCategory != null) {
-                    ArrayList<Product> products = searchForProducts(checkCategory, searchQuery);
+                    ArrayList<Product> foundProducts = new ArrayList<>();
+                    for (Product product : allProducts) {
+                        if (product.getName().toLowerCase().contains(searchQuery.toLowerCase()) ||
+                                product.getDescription().toLowerCase().contains(searchQuery.toLowerCase()) ||
+                                product.getProducer().toLowerCase().contains(searchQuery.toLowerCase())) {
+                            foundProducts.add(product);
+                        }
+                    }
 
-                    // Collecting goods for showing in the table
-                    String[][] data = new String[products.size()][5];
-                    for (int i = 0; i < products.size(); i++) {
-                        Product p = products.get(i);
+                    String[][] data = new String[foundProducts.size()][5];
+                    for (int i = 0; i < foundProducts.size(); i++) {
+                        Product p = foundProducts.get(i);
                         data[i][0] = p.getName();
                         data[i][1] = p.getDescription();
                         data[i][2] = p.getProducer();
@@ -1872,7 +1881,6 @@ public class Main extends JFrame {
                         data[i][4] = String.valueOf(p.getPrice());
                     }
 
-                    // Updating the table
                     String[] property = {"Name", "Description", "Producer", "Remained", "Price per piece"};
                     DefaultTableModel model = new DefaultTableModel(data, property) {
                         public boolean isCellEditable(int row, int column) {
@@ -1881,18 +1889,41 @@ public class Main extends JFrame {
                     };
                     foundGoods.setModel(model);
                 }
+                else {
+                    Category checkCategory = returnCategoryByName(selectedCategory);
+                    if (checkCategory != null) {
+                        ArrayList<Product> products = searchForProducts(checkCategory, searchQuery);
+
+                        String[][] data = new String[products.size()][5];
+                        for (int i = 0; i < products.size(); i++) {
+                            Product p = products.get(i);
+                            data[i][0] = p.getName();
+                            data[i][1] = p.getDescription();
+                            data[i][2] = p.getProducer();
+                            data[i][3] = String.valueOf(p.getAmountInStock());
+                            data[i][4] = String.valueOf(p.getPrice());
+                        }
+
+                        String[] property = {"Name", "Description", "Producer", "Remained", "Price per piece"};
+                        DefaultTableModel model = new DefaultTableModel(data, property) {
+                            public boolean isCellEditable(int row, int column) {
+                                return false;
+                            }
+                        };
+                        foundGoods.setModel(model);
+                    }
+                }
             }
         });
 
-        searchFrame.add(categoryLabel);
-        searchFrame.add(searchLabel2);
-        searchFrame.add(categoriesComboBox);
-        searchFrame.add(searchField);
         searchFrame.add(searchLabel);
-        searchFrame.add(foundGoodsScrollPane);
+        searchFrame.add(categoryLabel);
+        searchFrame.add(categoriesComboBox);
+        searchFrame.add(searchLabel2);
+        searchFrame.add(searchField);
         searchFrame.add(foundLabel);
+        searchFrame.add(foundGoodsScrollPane);
         searchFrame.add(searchButton);
-
         searchFrame.setVisible(true);
     }
 
