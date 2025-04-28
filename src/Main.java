@@ -763,9 +763,19 @@ public class Main extends JFrame {
                     String categoryName = nameField.getText();
                     String categoryNewDescription = newDescriptionField.getText();
                     Category categoryToUpdate = returnCategoryByName(categoryName);
-                    if(categoryToUpdate != null) {
+                    if(categoryToUpdate != null && !categoryNewDescription.isEmpty()) {
+                       updateCategoryDescription(categoryToUpdate, categoryNewDescription);
+                        JOptionPane.showMessageDialog(redactCategoryDescrFrame, "Category description updated successfully");
+                        categoryStatisticsText.setText("The Category description: " + categoryNewDescription
+                                + "\n\nTotal cost of the goods in the category: " + totalCategoryCostRounded);
 
-                    } else {
+                    }
+                    else if (categoryNewDescription.isEmpty()) {
+                        JOptionPane.showMessageDialog(redactCategoryDescrFrame, "Category description cannot be empty!");
+                        nameField.setText("");
+                        newDescriptionField.setText("");
+                    }
+                    else {
                         JOptionPane.showMessageDialog(redactCategoryDescrFrame, "Category not found");
                         nameField.setText("");
                         newDescriptionField.setText("");
