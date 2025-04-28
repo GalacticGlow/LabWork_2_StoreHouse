@@ -178,7 +178,7 @@ public class Main extends JFrame {
 
     public static Category returnCategoryByName(String target) {
         for (Category c : categories) {
-            if (c.getName().equals(target)) {
+            if (c.getName().equalsIgnoreCase(target)) {
                 return c;
             }
         }
@@ -220,6 +220,7 @@ public class Main extends JFrame {
         }
         return null;
     }
+
     public static Category returnCategoryByProduct(Product product) {
         for (Category c : categories) {
             if (c.getProducts().contains(product)) return c;
@@ -460,6 +461,8 @@ public class Main extends JFrame {
         this.setTitle("Store House");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(null);
+        this.setResizable(false);
+        this.setLocationRelativeTo(null);
 
         JLabel goodsCatagoryLabel = new JLabel("Goods Categories");
         goodsCatagoryLabel.setFont(new Font("Arial", Font.PLAIN, 24));
@@ -600,7 +603,7 @@ public class Main extends JFrame {
         redactButton.setBounds(520, 570, 200, 50);
         redactButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                showRedactChoiceButton();
+                showRedactChoiceWindow();
             }
         });
 
@@ -610,6 +613,9 @@ public class Main extends JFrame {
         searchButton.setBounds(750, 570, 200, 50);
         searchButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                if(searchFrame != null) {
+                    searchFrame.dispose();
+                }
                 showSearchWindow();
             }
         });
@@ -628,10 +634,12 @@ public class Main extends JFrame {
         this.add(goodsScrollPane);
     }
 
-    private void showRedactChoiceButton() {
+    private void showRedactChoiceWindow() {
         JFrame redactChoiceFrame = new JFrame("Redacting");
         redactChoiceFrame.setSize(350, 200);
+        redactChoiceFrame.setResizable(false);
         redactChoiceFrame.setLayout(null);
+        redactChoiceFrame.setLocationRelativeTo(null);
         JLabel choiceLabel = new JLabel("<html>Do you want to redact a category<br> or a product?</html>");
         choiceLabel.setBounds(15, 10, 250, 70);
         choiceLabel.setFont(new Font("Arial", Font.BOLD, 14));
@@ -670,7 +678,9 @@ public class Main extends JFrame {
     private void showRedactCategoryWindow() {
         redactCategoryFrame = new JFrame("Redacting Category");
         redactCategoryFrame.setSize(350, 200);
+        redactCategoryFrame.setResizable(false);
         redactCategoryFrame.setLayout(null);
+        redactCategoryFrame.setLocationRelativeTo(null);
         JLabel choiceLabel = new JLabel("<html>Do you want to redact a category name<br> or a description?</html>");
         choiceLabel.setBounds(15, 10, 300, 70);
         choiceLabel.setFont(new Font("Arial", Font.BOLD, 14));
@@ -705,7 +715,9 @@ public class Main extends JFrame {
     private void showRedactCategoryDescriptionWindow() {
         JFrame redactCategoryDescrFrame = new JFrame("Redact Category Description");
         redactCategoryDescrFrame.setSize(400, 270);
+        redactCategoryDescrFrame.setResizable(false);
         redactCategoryDescrFrame.setLayout(null);
+        redactCategoryDescrFrame.setLocationRelativeTo(null);
 
         JLabel titleField = new JLabel("Redact Category");
         titleField.setFont(new Font("Arial", Font.PLAIN, 28));
@@ -737,13 +749,7 @@ public class Main extends JFrame {
                     String categoryNewDescription = newDescriptionField.getText();
                     Category categoryToUpdate = returnCategoryByName(categoryName);
                     if(categoryToUpdate != null) {
-                        updateCategoryName(categoryToUpdate, categoryNewDescription); //todo
-                        JOptionPane.showMessageDialog(redactCategoryDescrFrame, "Category name updated successfully");
-                        addCategoryName();
-                        updateCategoryList();
-                        updateCategoryList();
-                        nameField.setText("");
-                        newDescriptionField.setText("");
+
                     } else {
                         JOptionPane.showMessageDialog(redactCategoryDescrFrame, "Category not found");
                         nameField.setText("");
@@ -770,7 +776,9 @@ public class Main extends JFrame {
     private void showRedactCategoryNameWindow() {
         JFrame redactCategoryNameFrame = new JFrame("Redact Category Name");
         redactCategoryNameFrame.setSize(400, 270);
+        redactCategoryNameFrame.setResizable(false);
         redactCategoryNameFrame.setLayout(null);
+        redactCategoryNameFrame.setLocationRelativeTo(null);
 
         JLabel titleField = new JLabel("Redact Category");
         titleField.setFont(new Font("Arial", Font.PLAIN, 28));
@@ -835,7 +843,9 @@ public class Main extends JFrame {
     private void showRedactProductWindow() {
         redactProductFrame = new JFrame("Redact Product");
         redactProductFrame.setSize(400, 300);
+        redactProductFrame.setResizable(false);
         redactProductFrame.setLayout(null);
+        redactProductFrame.setLocationRelativeTo(null);
         JLabel titleField = new JLabel("What to redact?");
         titleField.setFont(new Font("Arial", Font.PLAIN, 28));
         titleField.setBounds(90, 10, 250, 50);
@@ -912,7 +922,9 @@ public class Main extends JFrame {
     private void showRedactNameWindow() {
         JFrame redactNameFrame = new JFrame("Redact Name");
         redactNameFrame.setSize(400, 270);
+        redactNameFrame.setResizable(false);
         redactNameFrame.setLayout(null);
+        redactNameFrame.setLocationRelativeTo(null);
 
         JLabel titleField = new JLabel("Redact Product");
         titleField.setFont(new Font("Arial", Font.PLAIN, 28));
@@ -972,7 +984,9 @@ public class Main extends JFrame {
     private void showRedactDescriptionWindow() {
         JFrame redactDescriptionFrame = new JFrame("Redact Description");
         redactDescriptionFrame.setSize(400, 270);
+        redactDescriptionFrame.setResizable(false);
         redactDescriptionFrame.setLayout(null);
+        redactDescriptionFrame.setLocationRelativeTo(null);
 
         JLabel titleField = new JLabel("Redact Product");
         titleField.setFont(new Font("Arial", Font.PLAIN, 28));
@@ -1032,110 +1046,209 @@ public class Main extends JFrame {
 
     private void showRedactAmountWindow() {
         JFrame redactAmountFrame = new JFrame("Redact Amount");
-        redactAmountFrame.setSize(400, 350);
+        redactAmountFrame.setSize(350, 200);
+        redactAmountFrame.setResizable(false);
         redactAmountFrame.setLayout(null);
+        redactAmountFrame.setLocationRelativeTo(null);
+        JLabel choiceLabel = new JLabel("<html>Do you want to add or write-off<br> an amount of products?</html>");
+        choiceLabel.setBounds(35, 10, 250, 70);
+        choiceLabel.setFont(new Font("Arial", Font.BOLD, 17));
+        choiceLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        redactAmountFrame.add(choiceLabel);
+        redactAmountFrame.setVisible(true);
 
-        JLabel titleField = new JLabel("Redact Product");
+        JButton addProductsButton = new JButton("Add Product");
+        addProductsButton.setBounds(15, 100, 150, 30);
+        addProductsButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                redactAmountFrame.dispose();
+                showAddAmountWindow();
+            }
+        });
+
+        JButton removeProductButton = new JButton("Write-off Product");
+        removeProductButton.setBounds(170, 100, 150, 30);
+        removeProductButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                redactAmountFrame.dispose();
+                showWriteOffAmountWindow();
+            }
+        });
+        redactAmountFrame.add(addProductsButton);
+        redactAmountFrame.add(removeProductButton);
+    }
+
+    private void showAddAmountWindow() {
+        JFrame addAmountFrame = new JFrame("Redact Amount");
+        addAmountFrame.setSize(400, 270);
+        addAmountFrame.setResizable(false);
+        addAmountFrame.setLayout(null);
+        addAmountFrame.setLocationRelativeTo(null);
+
+        JLabel titleField = new JLabel("Add Amount");
         titleField.setFont(new Font("Arial", Font.PLAIN, 28));
         titleField.setBounds(90, 10, 250, 50);
-        redactAmountFrame.add(titleField);
+        addAmountFrame.add(titleField);
 
-        JTextField categoryField = new JTextField();
-        categoryField.setBounds(150, 65, 200, 35);
-        redactAmountFrame.add(categoryField);
         JTextField nameField = new JTextField();
-        nameField.setBounds(150, 125, 200, 35);
-        redactAmountFrame.add(nameField);
+        nameField.setBounds(150, 65, 200, 35);
+        addAmountFrame.add(nameField);
         JTextField newAmountField = new JTextField();
-        newAmountField.setBounds(160, 185, 190, 35);
-        redactAmountFrame.add(newAmountField);
-
-        JLabel categoryLabel = new JLabel("Category:");
-        categoryLabel.setBounds(25, 50, 185, 65);
-        redactAmountFrame.add(categoryLabel);
+        newAmountField.setBounds(150, 125, 200, 35);
+        addAmountFrame.add(newAmountField);
 
         JLabel nameLabel = new JLabel("Product Name:");
-        nameLabel.setBounds(25, 110, 185, 65);
-        redactAmountFrame.add(nameLabel);
+        nameLabel.setBounds(25, 50, 185, 65);
+        addAmountFrame.add(nameLabel);
 
-        JLabel newNameLabel = new JLabel("New Product Amount:");
-        newNameLabel.setBounds(25, 170, 185, 65);
-        redactAmountFrame.add(newNameLabel);
+        JLabel newNameLabel = new JLabel("Amount to add:");
+        newNameLabel.setBounds(25, 110, 185, 65);
+        addAmountFrame.add(newNameLabel);
 
-        JButton addButton = new JButton("Redact");
-        addButton.setBounds(30, 250, 150, 30);
-        redactAmountFrame.add(addButton);
-        addButton.addActionListener(new ActionListener() {
+        JButton redactButton = new JButton("Redact");
+        redactButton.setBounds(30, 180, 150, 30);
+        addAmountFrame.add(redactButton);
+        redactButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
-                    String categoryName = categoryField.getText();
                     String name = nameField.getText();
-                    int newAmount = Integer.parseInt(newAmountField.getText());
+                    int AmountToAdd = Integer.parseInt(newAmountField.getText());
 
-                    Category checkCategory = returnCategoryByName(categoryName);
-                    if (checkCategory != null) {
-                        Product productToUpdate = returnProductByName(name);
-                        if (productToUpdate != null) {
-                            updateProductData(productToUpdate, checkCategory, productToUpdate.getName(), productToUpdate.getDescription(), productToUpdate.getProducer(), newAmount, productToUpdate.getPrice());
-                            updateGeneralStatistics();
-                            refreshGoodsTable();
-                            JOptionPane.showMessageDialog(redactProductFrame, "Product amount updated successfully");
-                        } else {
-                            JOptionPane.showMessageDialog(redactProductFrame, "Product not found");
-                        }
-                    } else {
-                        JOptionPane.showMessageDialog(redactProductFrame, "Category not found");
+                    Product productToUpdate = returnProductByName(name);
+                    if (productToUpdate != null && AmountToAdd > 0) {
+                        int newAmount = AmountToAdd + productToUpdate.getAmountInStock();
+                        updateProductData(productToUpdate, returnCategoryByProduct(productToUpdate), productToUpdate.getName(), productToUpdate.getDescription(), productToUpdate.getProducer(), newAmount, productToUpdate.getPrice());
+                        updateGeneralStatistics();
+                        refreshGoodsTable();
+                        JOptionPane.showMessageDialog(addAmountFrame, "Product amount increased by " + AmountToAdd);
+                    } else if (AmountToAdd == 0) {
+                        JOptionPane.showMessageDialog(addAmountFrame, "Amount not updated");
+                    } else if (AmountToAdd < 0) {
+                        JOptionPane.showMessageDialog(addAmountFrame, "The number cannot be negative!");
+                    }
+                    else {
+                        JOptionPane.showMessageDialog(addAmountFrame, "Product not found");
                     }
 
                 } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(redactAmountFrame, "Error: " + ex.getMessage());
+                    JOptionPane.showMessageDialog(addAmountFrame, "Error: " + ex.getMessage());
                 }
             }
         });
 
-
         JButton cancelButton = new JButton("Cancel");
-        cancelButton.setBounds(200, 250, 150, 30);
+        cancelButton.setBounds(200, 180, 150, 30);
         cancelButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                redactAmountFrame.dispose();
+                addAmountFrame.dispose();
             }
         });
-        redactAmountFrame.add(cancelButton);
+        addAmountFrame.add(cancelButton);
 
-        redactAmountFrame.setVisible(true);
+        addAmountFrame.setVisible(true);
+    }
 
+    private void showWriteOffAmountWindow() {
+        JFrame writeOffAmountFrame = new JFrame("Redact Amount");
+        writeOffAmountFrame.setSize(400, 270);
+        writeOffAmountFrame.setResizable(false);
+        writeOffAmountFrame.setLayout(null);
+        writeOffAmountFrame.setLocationRelativeTo(null);
+
+        JLabel titleField = new JLabel("Write-off Amount");
+        titleField.setFont(new Font("Arial", Font.PLAIN, 28));
+        titleField.setBounds(90, 10, 250, 50);
+        writeOffAmountFrame.add(titleField);
+
+        JTextField nameField = new JTextField();
+        nameField.setBounds(150, 65, 200, 35);
+        writeOffAmountFrame.add(nameField);
+        JTextField newAmountField = new JTextField();
+        newAmountField.setBounds(150, 125, 200, 35);
+        writeOffAmountFrame.add(newAmountField);
+
+        JLabel nameLabel = new JLabel("Product Name:");
+        nameLabel.setBounds(25, 50, 185, 65);
+        writeOffAmountFrame.add(nameLabel);
+
+        JLabel newNameLabel = new JLabel("Amount to write-off:");
+        newNameLabel.setBounds(25, 110, 185, 65);
+        writeOffAmountFrame.add(newNameLabel);
+
+        JButton redactButton = new JButton("Redact");
+        redactButton.setBounds(30, 180, 150, 30);
+        writeOffAmountFrame.add(redactButton);
+        redactButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String name = nameField.getText();
+                    int AmountToWriteOff = Integer.parseInt(newAmountField.getText());
+
+                    Product productToUpdate = returnProductByName(name);
+                    if (productToUpdate != null && AmountToWriteOff > 0) {
+                        int newAmount = productToUpdate.getAmountInStock() - AmountToWriteOff;
+                        if (newAmount < 0) {
+                            JOptionPane.showMessageDialog(writeOffAmountFrame, "Amount cannot be negative!");
+                            return;
+                        }
+                        updateProductData(productToUpdate, returnCategoryByProduct(productToUpdate), productToUpdate.getName(), productToUpdate.getDescription(), productToUpdate.getProducer(), newAmount, productToUpdate.getPrice());
+                        updateGeneralStatistics();
+                        refreshGoodsTable();
+                        JOptionPane.showMessageDialog(writeOffAmountFrame,  AmountToWriteOff + " units of the Product have been written off.");
+                    } else if (AmountToWriteOff == 0) {
+                        JOptionPane.showMessageDialog(writeOffAmountFrame, "Amount not updated");
+                    } else {
+                        JOptionPane.showMessageDialog(writeOffAmountFrame, "Product not found");
+                    }
+
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(writeOffAmountFrame, "Error: " + ex.getMessage());
+                }
+            }
+        });
+
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.setBounds(200, 180, 150, 30);
+        cancelButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                writeOffAmountFrame.dispose();
+            }
+        });
+        writeOffAmountFrame.add(cancelButton);
+
+        writeOffAmountFrame.setVisible(true);
     }
 
     private void showRedactPriceWindow() {
-        JFrame redactAmountFrame = new JFrame("Redact Price");
-        redactAmountFrame.setSize(400, 270);
-        redactAmountFrame.setLayout(null);
+        JFrame redactPriceFrame = new JFrame("Redact Price");
+        redactPriceFrame.setSize(400, 270);
+        redactPriceFrame.setResizable(false);
+        redactPriceFrame.setLayout(null);
+        redactPriceFrame.setLocationRelativeTo(null);
 
         JLabel titleField = new JLabel("Redact Product");
         titleField.setFont(new Font("Arial", Font.PLAIN, 28));
         titleField.setBounds(90, 10, 250, 50);
-        redactAmountFrame.add(titleField);
-
+        redactPriceFrame.add(titleField);
 
         JTextField nameField = new JTextField();
         nameField.setBounds(150, 65, 200, 35);
-        redactAmountFrame.add(nameField);
+        redactPriceFrame.add(nameField);
         JTextField newPriceField = new JTextField();
         newPriceField.setBounds(150, 125, 200, 35);
-        redactAmountFrame.add(newPriceField);
+        redactPriceFrame.add(newPriceField);
 
         JLabel nameLabel = new JLabel("Product Name:");
         nameLabel.setBounds(25, 50, 185, 65);
-        redactAmountFrame.add(nameLabel);
+        redactPriceFrame.add(nameLabel);
 
         JLabel newNameLabel = new JLabel("New Product Price:");
         newNameLabel.setBounds(25, 110, 185, 65);
-        redactAmountFrame.add(newNameLabel);
+        redactPriceFrame.add(newNameLabel);
 
         JButton redactButton = new JButton("Redact");
         redactButton.setBounds(30, 180, 150, 30);
-        redactAmountFrame.add(redactButton);
+        redactPriceFrame.add(redactButton);
         redactButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
@@ -1148,15 +1261,17 @@ public class Main extends JFrame {
                             updateGeneralStatistics();
                             refreshGoodsTable();
                             JOptionPane.showMessageDialog(redactProductFrame, "Product price updated successfully");
-                        } else if (newPrice <= 0) {
-                            JOptionPane.showMessageDialog(redactProductFrame, "Price cannot be less than 0!");
+                        } else if (newPrice == 0) {
+                            JOptionPane.showMessageDialog(redactProductFrame, "Price cannot be 0!");
+                        } else if (newPrice < 0) {
+                            JOptionPane.showMessageDialog(removeProductFrame, "Price cannot be negative!");
                         }
                         else {
                             JOptionPane.showMessageDialog(redactProductFrame, "Product not found");
                         }
 
                 } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(redactAmountFrame, "Error: " + ex.getMessage());
+                    JOptionPane.showMessageDialog(redactPriceFrame, "Error: " + ex.getMessage());
                 }
             }
         });
@@ -1165,18 +1280,20 @@ public class Main extends JFrame {
         cancelButton.setBounds(200, 180, 150, 30);
         cancelButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                redactAmountFrame.dispose();
+                redactPriceFrame.dispose();
             }
         });
-        redactAmountFrame.add(cancelButton);
+        redactPriceFrame.add(cancelButton);
 
-        redactAmountFrame.setVisible(true);
+        redactPriceFrame.setVisible(true);
     }
 
     private void showRedactProducerWindow() {
         JFrame redactProducerFrame = new JFrame("Redact Producer");
         redactProducerFrame.setSize(400, 270);
+        redactProducerFrame.setResizable(false);
         redactProducerFrame.setLayout(null);
+        redactProducerFrame.setLocationRelativeTo(null);
 
         JLabel titleField = new JLabel("Redact Product");
         titleField.setFont(new Font("Arial", Font.PLAIN, 28));
@@ -1244,7 +1361,9 @@ public class Main extends JFrame {
     private void showAddChoiceWindow() {
         JFrame addChoiceFrame = new JFrame("Add");
         addChoiceFrame.setSize(350, 200);
+        addChoiceFrame.setResizable(false);
         addChoiceFrame.setLayout(null);
+        addChoiceFrame.setLocationRelativeTo(null);
         JLabel choiceLabel = new JLabel("<html>Do you want to add a category<br> or a product?</html>");
         choiceLabel.setBounds(15, 10, 250, 70);
         choiceLabel.setFont(new Font("Arial", Font.BOLD, 14));
@@ -1277,7 +1396,9 @@ public class Main extends JFrame {
     private void showAddCategoryWindow() {
         addCategoryFrame = new JFrame("Add Category");
         addCategoryFrame.setSize(400, 270);
+        addCategoryFrame.setResizable(false);
         addCategoryFrame.setLayout(null);
+        addCategoryFrame.setLocationRelativeTo(null);
 
         JLabel titleField = new JLabel("Add Category");
         titleField.setFont(new Font("Arial", Font.PLAIN, 28));
@@ -1358,7 +1479,9 @@ public class Main extends JFrame {
     private void showAddProductWindow() {
         addProductFrame = new JFrame("Add Product");
         addProductFrame.setSize(400, 530);
+        addProductFrame.setResizable(false);
         addProductFrame.setLayout(null);
+        addProductFrame.setLocationRelativeTo(null);
 
         JTextField nameField = new JTextField();
         nameField.setBounds(130, 65, 220, 35);
@@ -1463,7 +1586,9 @@ public class Main extends JFrame {
     private void showRemoveChoiceWindow() {
         JFrame removeChoiceFrame = new JFrame("Write-off");
         removeChoiceFrame.setSize(350, 200);
+        removeChoiceFrame.setResizable(false);
         removeChoiceFrame.setLayout(null);
+        removeChoiceFrame.setLocationRelativeTo(null);
         JLabel choiceLabel = new JLabel("<html>Do you want to write-off a product<br> or remove a category?</html>");
         choiceLabel.setBounds(15, 10, 250, 70);
         choiceLabel.setFont(new Font("Arial", Font.BOLD, 14));
@@ -1495,7 +1620,9 @@ public class Main extends JFrame {
     private void showRemoveCategoryWindow() {
         removeCategoryFrame = new JFrame("Remove Category");
         removeCategoryFrame.setSize(400, 200);
+        removeCategoryFrame.setResizable(false);
         removeCategoryFrame.setLayout(null);
+        removeCategoryFrame.setLocationRelativeTo(null);
 
         JLabel titleField = new JLabel("Remove Category");
         titleField.setFont(new Font("Arial", Font.PLAIN, 28));
@@ -1557,6 +1684,8 @@ public class Main extends JFrame {
         removeProductFrame = new JFrame("Write-off Product");
         removeProductFrame.setSize(400, 220);
         removeProductFrame.setLayout(null);
+        removeProductFrame.setLocationRelativeTo(null);
+        removeProductFrame.setResizable(false);
 
         JTextField nameField = new JTextField();
         nameField.setBounds(130, 65, 220, 35);
@@ -1610,7 +1739,9 @@ public class Main extends JFrame {
     private void showSearchWindow() {
         searchFrame = new JFrame("Search");
         searchFrame.setSize(600, 550);
+        searchFrame.setResizable(false);
         searchFrame.setLayout(null);
+        searchFrame.setLocationRelativeTo(null);
 
         JLabel searchLabel = new JLabel("Search");
         searchLabel.setFont(new Font("Arial", Font.BOLD, 28));
@@ -1694,6 +1825,7 @@ public class Main extends JFrame {
 
         searchFrame.setVisible(true);
     }
+
     private void refreshGoodsTable() {
         goodsArea.setVisible(true);
         String selected = (String) goodsGroupList.getSelectedValue();
