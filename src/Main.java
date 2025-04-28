@@ -1197,7 +1197,10 @@ public class Main extends JFrame {
                         JOptionPane.showMessageDialog(writeOffAmountFrame,  AmountToWriteOff + " units of the Product have been written off.");
                     } else if (AmountToWriteOff == 0) {
                         JOptionPane.showMessageDialog(writeOffAmountFrame, "Amount not updated");
-                    } else {
+                    }
+                    else if (AmountToWriteOff < 0){
+                        JOptionPane.showMessageDialog(writeOffAmountFrame, "Cannot write-off negative amount!");
+                    }else {
                         JOptionPane.showMessageDialog(writeOffAmountFrame, "Product not found");
                     }
 
