@@ -1,3 +1,9 @@
+/*
+Лабораторна 2
+Клас категорії. Має поля name, description, та products.
+File: Category.java
+Author: Artem Gulidov
+*/
 import java.util.ArrayList;
 
 public class Category {
