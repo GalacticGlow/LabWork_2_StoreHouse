@@ -841,7 +841,7 @@ public class Main extends JFrame {
                                 break;
                             }
                         }
-                    if(categoryToUpdate != null && !duplicateCategory) {
+                    if(categoryToUpdate != null && !duplicateCategory && !categoryNewName.isEmpty()) {
                         updateCategoryName(categoryToUpdate, categoryNewName);
                         JOptionPane.showMessageDialog(redactCategoryNameFrame, "Category name updated successfully");
                         addCategoryName();
@@ -852,6 +852,9 @@ public class Main extends JFrame {
                     }
                     else if (duplicateCategory) {
                         JOptionPane.showMessageDialog(redactCategoryNameFrame, "Category name already exists!");
+                    }
+                    else if (!categoryNewName.isEmpty()) {
+                        JOptionPane.showMessageDialog(redactCategoryNameFrame, "Category name cannot be empty!");
                     }
                     else {
                         JOptionPane.showMessageDialog(redactCategoryNameFrame, "Category not found");
@@ -1001,13 +1004,16 @@ public class Main extends JFrame {
                                 }
                             }
                         }
-                        if (productToUpdate != null && !duplicate) {
+                        if (productToUpdate != null && !duplicate && !newName.isEmpty()) {
                             updateProductData(productToUpdate, returnCategoryByProduct(productToUpdate), newName, productToUpdate.getDescription(), productToUpdate.getProducer(), productToUpdate.getAmountInStock(), productToUpdate.getPrice());
                             refreshGoodsTable();
                             JOptionPane.showMessageDialog(redactProductFrame, "Product name updated successfully");
                         }
                         else if (duplicate) {
                             JOptionPane.showMessageDialog(redactProductFrame, "Product already exists!");
+                        }
+                        else if (newName.isEmpty()) {
+                            JOptionPane.showMessageDialog(redactProductFrame, "New Product Name is empty!");
                         }
                         else {
                             JOptionPane.showMessageDialog(redactProductFrame, "Product not found");
@@ -1069,11 +1075,15 @@ public class Main extends JFrame {
                     String newDescription = newDescrField.getText();
 
                         Product productToUpdate = returnProductByName(name);
-                        if (productToUpdate != null) {
+                        if (productToUpdate != null && !newDescription.isEmpty()) {
                             updateProductData(productToUpdate, returnCategoryByProduct(productToUpdate), productToUpdate.getName(), newDescription, productToUpdate.getProducer(), productToUpdate.getAmountInStock(), productToUpdate.getPrice());
                             refreshGoodsTable();
                             JOptionPane.showMessageDialog(redactProductFrame, "Product description updated successfully");
-                        } else {
+                        }
+                        else if (newDescription.isEmpty()) {
+                            JOptionPane.showMessageDialog(redactProductFrame, "New Product Description is empty!");
+                        }
+                        else {
                             JOptionPane.showMessageDialog(redactProductFrame, "Product not found");
                         }
                 } catch (Exception ex) {
@@ -1379,11 +1389,15 @@ public class Main extends JFrame {
                     String newProducer = newProducerField.getText();
 
                         Product productToUpdate = returnProductByName(name);
-                        if (productToUpdate != null) {
+                        if (productToUpdate != null && !newProducer.isEmpty()) {
                             updateProductData(productToUpdate, returnCategoryByProduct(productToUpdate), productToUpdate.getName(), productToUpdate.getDescription(), newProducer, productToUpdate.getAmountInStock(), productToUpdate.getPrice());
                             refreshGoodsTable();
                             JOptionPane.showMessageDialog(redactProductFrame, "Product producer updated successfully");
-                        } else {
+                        }
+                        else if (newProducer.isEmpty()) {
+                            JOptionPane.showMessageDialog(redactProductFrame, "New producer cannot be empty!");
+                        }
+                        else {
                             JOptionPane.showMessageDialog(redactProductFrame, "Product not found");
                         }
                 } catch (Exception ex) {
@@ -1599,7 +1613,7 @@ public class Main extends JFrame {
 
                     Category checkCategory = returnCategoryByName(categoryName);
                     if (checkCategory != null) {
-                        if(!productExists(checkCategory, name) && !returnAllCategoryProductNames().contains(name) && amount >= 0 && price > 0) {
+                        if(!productExists(checkCategory, name) && !returnAllCategoryProductNames().contains(name.toLowerCase()) && amount >= 0 && price > 0 && !name.isEmpty() && !desc.isEmpty() && !producer.isEmpty()) {
                             Product p = new Product(name, desc, producer, amount, price);
                             addProduct(p, checkCategory);
                             updateGeneralStatistics();
@@ -1607,10 +1621,13 @@ public class Main extends JFrame {
                             JOptionPane.showMessageDialog(addProductFrame, "Product added successfully!");
                         }
                         else if (amount < 0) {
-                            JOptionPane.showMessageDialog(addProductFrame, "Ammount cannot be negative!");
+                            JOptionPane.showMessageDialog(addProductFrame, "Amount cannot be negative!");
                         }
                         else if (price <= 0) {
                             JOptionPane.showMessageDialog(addProductFrame, "Price cannot be less than 0!");
+                        }
+                        else if (name.isEmpty() || desc.isEmpty() || producer.isEmpty()) {
+                            JOptionPane.showMessageDialog(addProductFrame, "Fields cannot be empty!");
                         }
                         else {
                             JOptionPane.showMessageDialog(addProductFrame, "Product already exists!");
@@ -1970,7 +1987,7 @@ public class Main extends JFrame {
         updateProductData(laptop, electronics, "Legion", "Gaming Laptop", "MSI", 10, 2499.99);
          */
 
-        Category food = new Category("Food", "Food");
+        /*Category food = new Category("Food", "Food");
         addCategory(food);
         Product burger = new Product("Burger", "Gaming burger", "McDonald's", 0, 3.99);
         addProduct(burger, food);
@@ -1978,7 +1995,7 @@ public class Main extends JFrame {
         Category electronics = new Category("Electronics", "Electronics");
         addProduct(laptop, electronics);
         Product TV = new Product("TV", "TV", "TV", 10, 1999.99);
-        addProduct(TV, electronics);
+        addProduct(TV, electronics);*/
 
         System.out.println(printAllProducts());
         System.out.println(printAllProductsByCategory());
