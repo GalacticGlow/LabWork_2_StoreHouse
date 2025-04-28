@@ -1616,6 +1616,7 @@ public class Main extends JFrame {
                         deleteCategory(checkCategory);
                         updateGeneralStatistics();
                         JOptionPane.showMessageDialog(removeCategoryFrame, "Category removed successfully!");
+                        goodsArea.clearSelection();
                         nameField.setText("");
                         addCategoryName();
                         updateCategoryList();
