@@ -28,6 +28,7 @@ public class Main extends JFrame {
     private JFrame redactProductFrame;
     private JFrame searchFrame;
     ArrayList<String> categoryNames;
+    Category[] selectedCateg = {null};
 
     public static boolean contains(String[] arr, String target) {
         for (String str : arr) {
@@ -475,7 +476,7 @@ public class Main extends JFrame {
         // Updating Category List
         addCategoryName();
 
-        Category[] selectedCateg = {null};
+
         String[] categoryList = new String[categoryNames.size() + 1];
         categoryList[0] = "All Categories";
         for (int i = 0; i < categoryNames.size(); i++) {
@@ -489,77 +490,7 @@ public class Main extends JFrame {
         goodsGroupList.addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent e) {
                 if (!e.getValueIsAdjusting()) {
-                    String selected = (String) goodsGroupList.getSelectedValue();
-                    if (selected == null) return;
-
-                    if (selected.equals("All Categories")) {
-                        selectedCateg[0] = null;
-                        ArrayList<Product> allProducts = new ArrayList<>();
-                        for (Category c : categories) {
-                            allProducts.addAll(c.getProducts());
-                        }
-                        String[][] data = new String[allProducts.size()][5];
-                        for (int i = 0; i < allProducts.size(); i++) {
-                            Product p = allProducts.get(i);
-                            data[i][0] = p.getName();
-                            data[i][1] = p.getDescription();
-                            data[i][2] = p.getProducer();
-                            data[i][3] = String.valueOf(p.getAmountInStock());
-                            data[i][4] = String.valueOf(p.getPrice());
-                        }
-                        String[] property = {"Name", "Description", "Producer", "Remained", "Price per piece"};
-                        DefaultTableModel model = new DefaultTableModel(data, property) {
-                            public boolean isCellEditable(int row, int column) {
-                                return false;
-                            }
-                        };
-                        goodsArea.setModel(model);
-
-                        categoryStatisticsText.setText("All categories");
-                    }
-
-                    // Searching for a category
-                    Category selectedCategory = null;
-                    for (Category c : categories) {
-                        if (c.getName().equals(selected)) {
-                            selectedCategory = c;
-                            selectedCateg[0] = c;
-                            break;
-                        }
-                    }
-
-                    if (selectedCategory != null) {
-                        ArrayList<Product> products = selectedCategory.getProducts();
-
-                        // Collecting goods for showing in the table
-                        String[][] data = new String[products.size()][5];
-                        for (int i = 0; i < products.size(); i++) {
-                            Product p = products.get(i);
-                            data[i][0] = p.getName();
-                            data[i][1] = p.getDescription();
-                            data[i][2] = p.getProducer();
-                            data[i][3] = String.valueOf(p.getAmountInStock());
-                            data[i][4] = String.valueOf(p.getPrice());
-                        }
-
-                        // Updating the table
-                        String[] property = {"Name", "Description", "Producer", "Remained", "Price per piece"};
-                        DefaultTableModel model = new DefaultTableModel(data, property) {
-                            public boolean isCellEditable(int row, int column) {
-                                return false;
-                            }
-                        };
-                        goodsArea.setModel(model);
-
-                        double totalCategoryCost = 0;
-                        for(Product p : selectedCategory.getProducts()) {
-                            totalCategoryCost += p.getAmountInStock() * p.getPrice();
-                        }
-                        totalCategoryCostRounded = Math.round(totalCategoryCost * 100.0) / 100.0;
-
-                        categoryStatisticsText.setText("The Category description:" + selectedCategory.getDescription()
-                                + "\n\nTotal cost of the goods in the category: " + totalCategoryCostRounded);
-                    }
+                    refreshGoodsTable();
                 }
             }
         });
@@ -1029,6 +960,7 @@ public class Main extends JFrame {
                         Product productToUpdate = returnProductByName(checkCategory.getProducts(), name);
                         if (productToUpdate != null) {
                             updateProductData(productToUpdate, checkCategory, newName, productToUpdate.getDescription(), productToUpdate.getProducer(), productToUpdate.getAmountInStock(), productToUpdate.getPrice());
+                            refreshGoodsTable();
                             JOptionPane.showMessageDialog(redactProductFrame, "Product name updated successfully");
                         } else {
                             JOptionPane.showMessageDialog(redactProductFrame, "Product not found");
@@ -1101,6 +1033,7 @@ public class Main extends JFrame {
                         Product productToUpdate = returnProductByName(checkCategory.getProducts(), name);
                         if (productToUpdate != null) {
                             updateProductData(productToUpdate, checkCategory, productToUpdate.getName(), newDescription, productToUpdate.getProducer(), productToUpdate.getAmountInStock(), productToUpdate.getPrice());
+                            refreshGoodsTable();
                             JOptionPane.showMessageDialog(redactProductFrame, "Product description updated successfully");
                         } else {
                             JOptionPane.showMessageDialog(redactProductFrame, "Product not found");
@@ -1174,6 +1107,7 @@ public class Main extends JFrame {
                         if (productToUpdate != null) {
                             updateProductData(productToUpdate, checkCategory, productToUpdate.getName(), productToUpdate.getDescription(), productToUpdate.getProducer(), newAmount, productToUpdate.getPrice());
                             updateGeneralStatistics();
+                            refreshGoodsTable();
                             JOptionPane.showMessageDialog(redactProductFrame, "Product amount updated successfully");
                         } else {
                             JOptionPane.showMessageDialog(redactProductFrame, "Product not found");
@@ -1248,6 +1182,7 @@ public class Main extends JFrame {
                         if (productToUpdate != null) {
                             updateProductData(productToUpdate, checkCategory, productToUpdate.getName(), productToUpdate.getDescription(), productToUpdate.getProducer(), productToUpdate.getAmountInStock(), newPrice);
                             updateGeneralStatistics();
+                            refreshGoodsTable();
                             JOptionPane.showMessageDialog(redactProductFrame, "Product price updated successfully");
                         } else {
                             JOptionPane.showMessageDialog(redactProductFrame, "Product not found");
@@ -1321,6 +1256,7 @@ public class Main extends JFrame {
                         Product productToUpdate = returnProductByName(checkCategory.getProducts(), name);
                         if (productToUpdate != null) {
                             updateProductData(productToUpdate, checkCategory, productToUpdate.getName(), productToUpdate.getDescription(), newProducer, productToUpdate.getAmountInStock(), productToUpdate.getPrice());
+                            refreshGoodsTable();
                             JOptionPane.showMessageDialog(redactProductFrame, "Product producer updated successfully");
                         } else {
                             JOptionPane.showMessageDialog(redactProductFrame, "Product not found");
@@ -1539,6 +1475,7 @@ public class Main extends JFrame {
                             Product p = new Product(name, desc, producer, amount, price);
                             addProduct(p, checkCategory);
                             updateGeneralStatistics();
+                            refreshGoodsTable();
                             JOptionPane.showMessageDialog(addProductFrame, "Product added successfully!");
                         } else {
                             JOptionPane.showMessageDialog(addProductFrame, "Product already exists!");
@@ -1695,6 +1632,7 @@ public class Main extends JFrame {
                         if(checkProduct != null) {
                             deleteProduct(checkProduct, checkCategory);
                             updateGeneralStatistics();
+                            refreshGoodsTable();
                             JOptionPane.showMessageDialog(removeProductFrame, "Product removed successfully!");
                         } else {
                             JOptionPane.showMessageDialog(removeProductFrame, "Product not found");
@@ -1806,6 +1744,79 @@ public class Main extends JFrame {
         searchFrame.add(searchButton);
 
         searchFrame.setVisible(true);
+    }
+    private void refreshGoodsTable() {
+        String selected = (String) goodsGroupList.getSelectedValue();
+        if (selected == null) return;
+
+        if (selected.equals("All Categories")) {
+            selectedCateg[0] = null;
+            ArrayList<Product> allProducts = new ArrayList<>();
+            for (Category c : categories) {
+                allProducts.addAll(c.getProducts());
+            }
+            String[][] data = new String[allProducts.size()][5];
+            for (int i = 0; i < allProducts.size(); i++) {
+                Product p = allProducts.get(i);
+                data[i][0] = p.getName();
+                data[i][1] = p.getDescription();
+                data[i][2] = p.getProducer();
+                data[i][3] = String.valueOf(p.getAmountInStock());
+                data[i][4] = String.valueOf(p.getPrice());
+            }
+            String[] property = {"Name", "Description", "Producer", "Remained", "Price per piece"};
+            DefaultTableModel model = new DefaultTableModel(data, property) {
+                public boolean isCellEditable(int row, int column) {
+                    return false;
+                }
+            };
+            goodsArea.setModel(model);
+
+            categoryStatisticsText.setText("All categories");
+        }
+
+        // Searching for a category
+        Category selectedCategory = null;
+        for (Category c : categories) {
+            if (c.getName().equals(selected)) {
+                selectedCategory = c;
+                selectedCateg[0] = c;
+                break;
+            }
+        }
+
+        if (selectedCategory != null) {
+            ArrayList<Product> products = selectedCategory.getProducts();
+
+            // Collecting goods for showing in the table
+            String[][] data = new String[products.size()][5];
+            for (int i = 0; i < products.size(); i++) {
+                Product p = products.get(i);
+                data[i][0] = p.getName();
+                data[i][1] = p.getDescription();
+                data[i][2] = p.getProducer();
+                data[i][3] = String.valueOf(p.getAmountInStock());
+                data[i][4] = String.valueOf(p.getPrice());
+            }
+
+            // Updating the table
+            String[] property = {"Name", "Description", "Producer", "Remained", "Price per piece"};
+            DefaultTableModel model = new DefaultTableModel(data, property) {
+                public boolean isCellEditable(int row, int column) {
+                    return false;
+                }
+            };
+            goodsArea.setModel(model);
+
+            double totalCategoryCost = 0;
+            for(Product p : selectedCategory.getProducts()) {
+                totalCategoryCost += p.getAmountInStock() * p.getPrice();
+            }
+            totalCategoryCostRounded = Math.round(totalCategoryCost * 100.0) / 100.0;
+
+            categoryStatisticsText.setText("The Category description:" + selectedCategory.getDescription()
+                    + "\n\nTotal cost of the goods in the category: " + totalCategoryCostRounded);
+        }
     }
 
     public static void main(String[] args) {
