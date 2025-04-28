@@ -955,8 +955,20 @@ public class Main extends JFrame {
                 try {
                     String name = nameField.getText();
                     String newName = newNameField.getText();
+
+                    for(Category c : categories) {
+                        for(Product p : c.getProducts()) {
+                            if(newName.equalsIgnoreCase(p.getName())) {
+                                JOptionPane.showMessageDialog(redactNameFrame, "The product with this name already exists!");
+                                return;
+                            }
+                        }
+                    }
+
+
+
                         Product productToUpdate = returnProductByName(name);
-                        if (productToUpdate != null) {
+                    if (productToUpdate != null) {
                             updateProductData(productToUpdate, returnCategoryByProduct(productToUpdate), newName, productToUpdate.getDescription(), productToUpdate.getProducer(), productToUpdate.getAmountInStock(), productToUpdate.getPrice());
                             refreshGoodsTable();
                             JOptionPane.showMessageDialog(redactProductFrame, "Product name updated successfully");
