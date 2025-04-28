@@ -1,3 +1,9 @@
+/*
+Лабораторна 2
+Клас товару. Має поля name, description, producer, amountInStock, та price.
+File: Product.java
+Author: Artem Gulidov
+*/
 public class Product {
     //all the product attributes in order
     String name;
