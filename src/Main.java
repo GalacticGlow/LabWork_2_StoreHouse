@@ -1535,7 +1535,7 @@ public class Main extends JFrame {
 
                     Category checkCategory = returnCategoryByName(categoryName);
                     if (checkCategory != null) {
-                        if(!productExists(checkCategory, name)) {
+                        if(!productExists(checkCategory, name) && !returnAllCategoryProductNames().contains(name)) {
                             Product p = new Product(name, desc, producer, amount, price);
                             addProduct(p, checkCategory);
                             updateGeneralStatistics();
