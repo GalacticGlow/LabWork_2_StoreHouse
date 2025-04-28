@@ -1427,6 +1427,10 @@ public class Main extends JFrame {
                             JOptionPane.showMessageDialog(addCategoryFrame, "Enter the name of the Category");
                             return;
                         }
+                        if (categoryToAdd.getDescription().isEmpty()) {
+                            JOptionPane.showMessageDialog(addCategoryFrame, "Enter the description of the Category");
+                            return;
+                        }
                         addCategory(categoryToAdd);
                         updateGeneralStatistics();
                         JOptionPane.showMessageDialog(addCategoryFrame, "Category added successfully!");
