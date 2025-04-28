@@ -114,16 +114,13 @@ public class Main extends JFrame {
         if (categories.contains(category)) {
             String oldName = category.getName();
 
-            // Update the in-memory category list
             categories.remove(category);
             category.setName(newName);
             categories.add(category);
 
-            // Read Categories.txt
             ArrayList<String> existingCategories = readFromFile("src/Categories.txt");
             System.out.println("Existing categories before update: " + existingCategories);
 
-            // Replace oldName with newName in the existing categories list
             for (int i = 0; i < existingCategories.size(); i++) {
                 if (existingCategories.get(i).trim().contains(oldName.trim())) {
                     existingCategories.set(i, newName + " | " + category.getDescription());
@@ -132,11 +129,9 @@ public class Main extends JFrame {
                 System.out.println(existingCategories.get(i).trim());
             }
 
-            // Write the updated list back to Categories.txt
             System.out.println("Existing categories after update: " + existingCategories);
             writeAllToFile("src/Categories.txt", existingCategories);
 
-            // Rename the corresponding category file
             File folder = new File("ProductCategories/");
             if (!folder.exists()) {
                 folder.mkdirs();
@@ -148,7 +143,6 @@ public class Main extends JFrame {
                 System.out.println(file.getName());
             }
 
-            // Rename file if it exists
             for (File file : files) {
                 if (file.getName().equals(oldName + ".txt")) {
                     if (file.renameTo(new File(folder, newName + ".txt"))) {
@@ -160,7 +154,6 @@ public class Main extends JFrame {
                 }
             }
 
-            // Final output to show success
             System.out.println("Updated Category: " + category.getName());
             System.out.println("Current state of ProductCategories: " + categories);
         } else {
@@ -168,6 +161,28 @@ public class Main extends JFrame {
         }
     }
 
+    public static void updateCategoryDescription(Category category, String newDescription) {
+        if (categories.contains(category)) {
+            String oldDescription = category.getDescription();
+            categories.remove(category);
+            category.setDescription(newDescription);
+            categories.add(category);
+
+            ArrayList<String> existingCategories = readFromFile("src/Categories.txt");
+
+            for (int i = 0; i < existingCategories.size(); i++) {
+                if (existingCategories.get(i).trim().startsWith(category.getName().trim() + " | ")) {
+                    existingCategories.set(i, category.getName() + " | " + newDescription);
+                    break;
+                }
+            }
+
+            writeAllToFile("src/Categories.txt", existingCategories);
+        }
+        else {
+            System.out.println("Category does not exist, cannot update category description");
+        }
+    }
 
     public static boolean containsName(ArrayList<Product> products, String targetName) {
         for (Product product : products) {
