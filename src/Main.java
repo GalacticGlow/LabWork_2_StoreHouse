@@ -1,3 +1,9 @@
+/*
+Лабораторна 2
+Головний клас, в якому ініціалізовані методи праці з об'єктами та графічний інтерфейс.
+File: Main.java
+Authors: Artem Gulidov, Dmytro Kvitka, Romanyuk Nazariy
+*/
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -8,13 +14,8 @@ import javax.swing.table.DefaultTableModel;
 
 public class Main extends JFrame {
     static ArrayList<Category> categories = new ArrayList<>();
-    private static final String options = "Enter 0 to change name; Enter 1 to add; Enter 2 to update; Enter 3 to delete; Enter 4 to exit";
-    private static final char[] bilingualAlphabet = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
-            'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'А', 'Б', 'В', 'Г', 'Ґ', 'Д', 'Е', 'Є', 'Ж', 'З', 'И', 'І', 'Ї', 'Й',
-            'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц', 'Ч',
-            'Ш', 'Щ', 'Ь', 'Ю', 'Я'};
-    private double totalCategoryCostRounded;
 
+    private double totalCategoryCostRounded;
     private JList goodsGroupList;
     private JTable goodsArea;
     private JTextArea categoryStatisticsText;
@@ -24,7 +25,6 @@ public class Main extends JFrame {
     private JFrame removeCategoryFrame;
     private JFrame removeProductFrame;
     private JFrame redactCategoryFrame;
-    private JFrame redactCategoryDescriptionFrame;
     private JFrame redactProductFrame;
     private JFrame searchFrame;
     ArrayList<String> categoryNames;
@@ -77,8 +77,6 @@ public class Main extends JFrame {
                     System.out.println("Error creating file: " + e.getMessage());
                 }
             }
-        } else {
-            System.out.println("Category already exists, cannot add new category");
         }
     }
 
@@ -105,8 +103,6 @@ public class Main extends JFrame {
                     break;
                 }
             }
-        } else {
-            System.out.println("Category does not exist, cannot delete category");
         }
     }
 
@@ -119,14 +115,14 @@ public class Main extends JFrame {
             categories.add(category);
 
             ArrayList<String> existingCategories = readFromFile("src/Categories.txt");
-            System.out.println("Existing categories before update: " + existingCategories);
+            //System.out.println("Existing categories before update: " + existingCategories);
 
             for (int i = 0; i < existingCategories.size(); i++) {
                 if (existingCategories.get(i).trim().contains(oldName.trim())) {
                     existingCategories.set(i, newName + " | " + category.getDescription());
                     break;
                 }
-                System.out.println(existingCategories.get(i).trim());
+                //System.out.println(existingCategories.get(i).trim());
             }
 
             System.out.println("Existing categories after update: " + existingCategories);
@@ -138,26 +134,17 @@ public class Main extends JFrame {
             }
 
             File[] files = folder.listFiles();
-            System.out.println("Files in ProductCategories before renaming: ");
-            for (File file : files) {
-                System.out.println(file.getName());
-            }
 
             for (File file : files) {
                 if (file.getName().equals(oldName + ".txt")) {
                     if (file.renameTo(new File(folder, newName + ".txt"))) {
-                        System.out.println("Renamed file: " + file.getName() + " to " + newName + ".txt");
+                        //System.out.println("Renamed file: " + file.getName() + " to " + newName + ".txt");
                     } else {
-                        System.out.println("Failed to rename file: " + oldName + ".txt");
+                        //System.out.println("Failed to rename file: " + oldName + ".txt");
                     }
                     break;
                 }
             }
-
-            System.out.println("Updated Category: " + category.getName());
-            System.out.println("Current state of ProductCategories: " + categories);
-        } else {
-            System.out.println("Category does not exist, cannot update category");
         }
     }
 
@@ -179,16 +166,6 @@ public class Main extends JFrame {
 
             writeAllToFile("src/Categories.txt", existingCategories);
         }
-        else {
-            System.out.println("Category does not exist, cannot update category description");
-        }
-    }
-
-    public static boolean containsName(ArrayList<Product> products, String targetName) {
-        for (Product product : products) {
-            if (product.getName().equals(targetName)) return true;
-        }
-        return false;
     }
 
     public static Category returnCategoryByName(String target) {
@@ -213,17 +190,17 @@ public class Main extends JFrame {
     public static void addProduct(Product product, Category category) {
         Category existingCategory = returnCategoryByName(category.getName());
         if (existingCategory == null) {
-            System.out.println("Category not found in list, cannot add product.");
+            //System.out.println("Category not found in list, cannot add product.");
             return;
         }
 
         if (!returnAllCategoryProductNames().contains(product.getName().toLowerCase())) {
-            System.out.println("Product " + product.getName() + " can be added to Category " + existingCategory.getName());
+            //System.out.println("Product " + product.getName() + " can be added to Category " + existingCategory.getName());
             existingCategory.getProducts().add(product);
             appendToFile("ProductCategories/" + existingCategory.getName() + ".txt", product.toString());
         }
         else {
-            System.out.println("Product " + product.getName() + " already exists somewhere, cannot add product.");
+            //System.out.println("Product " + product.getName() + " already exists somewhere, cannot add product.");
         }
     }
 
@@ -252,11 +229,7 @@ public class Main extends JFrame {
                 ArrayList<String> categoryProducts = readFromFile("ProductCategories/" + category.getName() + ".txt");
                 categoryProducts.remove(toRemove.toString());
                 writeAllToFile("ProductCategories/" + category.getName() + ".txt", categoryProducts);
-            } else {
-                System.out.println("Error: product category not found");
             }
-        } else {
-            System.out.println("Product does not exist, cannot delete product");
         }
     }
 
@@ -276,18 +249,6 @@ public class Main extends JFrame {
             }
             writeAllToFile("ProductCategories/" + Objects.requireNonNull(returnCategoryByProduct(toUpdate)).getName() + ".txt", updatedProductStrings);
         }
-        else {
-            System.out.println("Product does not exist, cannot update product");
-        }
-    }
-
-    public static void writeToFile(String fileName, String text) {
-        try (FileWriter writer = new FileWriter(fileName)){
-            writer.write(text + "\n");
-        }
-        catch (IOException e){
-            System.out.println(e.getMessage());
-        }
     }
 
     public static void appendToFile(String fileName, String text) {
@@ -300,7 +261,7 @@ public class Main extends JFrame {
     }
 
     public static void writeAllToFile(String fileName, ArrayList<String> lines) {
-        System.out.println("Attempting to write to file: " + fileName);  // Debugging line
+        //System.out.println("Attempting to write to file: " + fileName);  // Debugging line
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
             for (String line : lines) {
                 writer.write(line);
@@ -337,94 +298,6 @@ public class Main extends JFrame {
             }
         }
         return foundProducts;
-    }
-
-    public static String printAllProducts(){
-        StringBuilder sb = new StringBuilder();
-        ArrayList<Product> products = new ArrayList<>();
-
-        for (Category category : categories) {
-            products.addAll(category.getProducts());
-        }
-        products.sort((p1, p2) -> {
-            String o1 = p1.getName();
-            String o2 = p2.getName();
-
-            int len = Math.min(o1.length(), o2.length());
-
-            for (int i = 0; i < len; i++) {
-                if (getCharIndex(o1.charAt(i)) != getCharIndex(o2.charAt(i))) {
-                    return getCharIndex(o1.charAt(i)) - getCharIndex(o2.charAt(i));
-                }
-            }
-            return o1.length() - o2.length();
-        });
-        sb.append("All ").append(products.size()).append(" products: \n");
-        for (Product product : products) {
-            sb.append(product.toString()).append(" | Full price in stock: ").append(product.getFullPrice()).append("\n");
-        }
-        return sb.toString();
-
-    }
-
-    public static String printAllProductsByCategory() {
-        StringBuilder sb = new StringBuilder();
-        ArrayList<Category> categoriesSorted = new ArrayList<>(categories);
-        if (!categoriesSorted.isEmpty()) {
-            categoriesSorted.sort((c1, c2) -> {
-                String o1 = c1.getName();
-                String o2 = c2.getName();
-
-                int len = Math.min(o1.length(), o2.length());
-
-                for (int i = 0; i < len; i++) {
-                    if (getCharIndex(o1.charAt(i)) != getCharIndex(o2.charAt(i))) {
-                        return getCharIndex(o1.charAt(i)) - getCharIndex(o2.charAt(i));
-                    }
-                }
-                return o1.length() - o2.length();
-            });
-            for (Category category : categoriesSorted) {
-                double totalCategoryPrice = 0;
-                ArrayList<Product> products = category.getProducts();
-                if (!products.isEmpty()) {
-                    for (Product product : products) {
-                        totalCategoryPrice += product.getFullPrice();
-                    }
-                    sb.append("Category: ").append(category).append(" | Full price in stock: ").append(totalCategoryPrice).append("\n").append("\n");
-                    products.sort((p1, p2) -> {
-                        String o1 = p1.getName();
-                        String o2 = p2.getName();
-
-                        int len = Math.min(o1.length(), o2.length());
-
-                        for (int i = 0; i < len; i++) {
-                            if (getCharIndex(o1.charAt(i)) != getCharIndex(o2.charAt(i))) {
-                                return getCharIndex(o1.charAt(i)) - getCharIndex(o2.charAt(i));
-                            }
-                        }
-                        return o1.length() - o2.length();
-                    });
-                    for (Product product : products) {
-                        sb.append(product.toString()).append(" | Full price in stock: ").append(product.getFullPrice()).append("\n");
-                    }
-                    sb.append("\n");
-                }
-                else sb.append("No products found in Category ").append(category.getName()).append("\n").append("\n");
-            }
-        }
-        else sb.append("No categories found.");
-
-        return sb.toString();
-    }
-
-    private static int getCharIndex(char c){
-        for (int i = 0; i < bilingualAlphabet.length; i++) {
-            if(bilingualAlphabet[i] == c){
-                return i;
-            }
-        }
-        return Integer.MAX_VALUE;
     }
 
     private boolean productExists(Category category, String productName) {
@@ -2007,28 +1880,5 @@ public class Main extends JFrame {
 
         Main window = new Main();
         window.setVisible(true);
-
-        /*Category electronics = new Category("Electronics", "Electronics");
-        addCategory(electronics);
-        Category books = new Category("Books", "jsadklfjas;dlkfj");
-        addCategory(books);
-        Product laptop = new Product("Laptop", "Gaming Laptop", "MSI", 10, 1499.99);
-        addProduct(laptop, electronics);
-        updateProductData(laptop, electronics, "Laptop Pro", "High-end Gaming Laptop", "MSI", 8, 1899.99);
-        updateProductData(laptop, electronics, "Legion", "Gaming Laptop", "MSI", 10, 2499.99);
-         */
-
-        /*Category food = new Category("Food", "Food");
-        addCategory(food);
-        Product burger = new Product("Burger", "Gaming burger", "McDonald's", 0, 3.99);
-        addProduct(burger, food);
-        Product laptop = new Product("Laptop", "Gaming Laptop", "MSI", 10, 1499.99);
-        Category electronics = new Category("Electronics", "Electronics");
-        addProduct(laptop, electronics);
-        Product TV = new Product("TV", "TV", "TV", 10, 1999.99);
-        addProduct(TV, electronics);*/
-
-        System.out.println(printAllProducts());
-        System.out.println(printAllProductsByCategory());
     }
 }
