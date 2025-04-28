@@ -1,4 +1,3 @@
 BigMac | burgah | McDonalds | 3 | 5.99
 Burger | Gaming burger | BurgerKing | 5 | 3.99
 CocaCola | yummy drink | The Coca-Cola Company | 15 | 51.49
-eg | weg | weg | 34 | 34.0
