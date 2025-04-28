@@ -1093,6 +1093,7 @@ public class Main extends JFrame {
             }
         });
 
+
         JButton cancelButton = new JButton("Cancel");
         cancelButton.setBounds(200, 250, 150, 30);
         cancelButton.addActionListener(new ActionListener() {
@@ -1103,6 +1104,7 @@ public class Main extends JFrame {
         redactAmountFrame.add(cancelButton);
 
         redactAmountFrame.setVisible(true);
+
     }
 
     private void showRedactPriceWindow() {
@@ -1141,12 +1143,15 @@ public class Main extends JFrame {
                     double newPrice = Double.parseDouble(newPriceField.getText());
 
                         Product productToUpdate = returnProductByName(name);
-                        if (productToUpdate != null) {
+                        if (productToUpdate != null && newPrice > 0) {
                             updateProductData(productToUpdate, returnCategoryByProduct(productToUpdate), productToUpdate.getName(), productToUpdate.getDescription(), productToUpdate.getProducer(), productToUpdate.getAmountInStock(), newPrice);
                             updateGeneralStatistics();
                             refreshGoodsTable();
                             JOptionPane.showMessageDialog(redactProductFrame, "Product price updated successfully");
-                        } else {
+                        } else if (newPrice <= 0) {
+                            JOptionPane.showMessageDialog(redactProductFrame, "Price cannot be less than 0!");
+                        }
+                        else {
                             JOptionPane.showMessageDialog(redactProductFrame, "Product not found");
                         }
 
@@ -1418,13 +1423,20 @@ public class Main extends JFrame {
 
                     Category checkCategory = returnCategoryByName(categoryName);
                     if (checkCategory != null) {
-                        if(!productExists(checkCategory, name) && !returnAllCategoryProductNames().contains(name)) {
+                        if(!productExists(checkCategory, name) && !returnAllCategoryProductNames().contains(name) && amount >= 0 && price > 0) {
                             Product p = new Product(name, desc, producer, amount, price);
                             addProduct(p, checkCategory);
                             updateGeneralStatistics();
                             refreshGoodsTable();
                             JOptionPane.showMessageDialog(addProductFrame, "Product added successfully!");
-                        } else {
+                        }
+                        else if (amount < 0) {
+                            JOptionPane.showMessageDialog(addProductFrame, "Ammount cannot be negative!");
+                        }
+                        else if (price <= 0) {
+                            JOptionPane.showMessageDialog(addProductFrame, "Price cannot be less than 0!");
+                        }
+                        else {
                             JOptionPane.showMessageDialog(addProductFrame, "Product already exists!");
                         }
                     } else {
