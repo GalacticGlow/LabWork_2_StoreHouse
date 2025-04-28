@@ -189,7 +189,7 @@ public class Main extends JFrame {
         ArrayList<String> allProductNames = new ArrayList<>();
         for (Category c : categories) {
             for (Product p : c.getProducts()) {
-                allProductNames.add(p.getName());
+                allProductNames.add(p.getName().toLowerCase());
             }
         }
         return allProductNames;
@@ -202,7 +202,7 @@ public class Main extends JFrame {
             return;
         }
 
-        if (!returnAllCategoryProductNames().contains(product.getName())) {
+        if (!returnAllCategoryProductNames().contains(product.getName().toLowerCase())) {
             System.out.println("Product " + product.getName() + " can be added to Category " + existingCategory.getName());
             existingCategory.getProducts().add(product);
             appendToFile("ProductCategories/" + existingCategory.getName() + ".txt", product.toString());
