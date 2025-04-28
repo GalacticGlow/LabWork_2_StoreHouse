@@ -111,6 +111,9 @@ public class Main extends JFrame {
     }
 
     public static void updateCategoryName(Category category, String newName) {
+        for (Category c : categories) {
+            if (c.getName().equalsIgnoreCase(category.getName())) {}
+        }
         if (categories.contains(category)) {
             String oldName = category.getName();
 
@@ -204,7 +207,7 @@ public class Main extends JFrame {
         ArrayList<String> allProductNames = new ArrayList<>();
         for (Category c : categories) {
             for (Product p : c.getProducts()) {
-                allProductNames.add(p.getName());
+                allProductNames.add(p.getName().toLowerCase());
             }
         }
         return allProductNames;
@@ -217,7 +220,7 @@ public class Main extends JFrame {
             return;
         }
 
-        if (!returnAllCategoryProductNames().contains(product.getName())) {
+        if (!returnAllCategoryProductNames().contains(product.getName().toLowerCase())) {
             System.out.println("Product " + product.getName() + " can be added to Category " + existingCategory.getName());
             existingCategory.getProducts().add(product);
             appendToFile("ProductCategories/" + existingCategory.getName() + ".txt", product.toString());
@@ -824,7 +827,14 @@ public class Main extends JFrame {
                     String categoryName = nameField.getText();
                     String categoryNewName = newNameField.getText();
                     Category categoryToUpdate = returnCategoryByName(categoryName);
-                    if(categoryToUpdate != null) {
+                    boolean duplicateCategory = false;
+                    for(Category c : categories) {
+                            if (categoryNewName.equalsIgnoreCase(c.getName())) {
+                                duplicateCategory = true;
+                                break;
+                            }
+                        }
+                    if(categoryToUpdate != null && !duplicateCategory) {
                         updateCategoryName(categoryToUpdate, categoryNewName);
                         JOptionPane.showMessageDialog(redactCategoryNameFrame, "Category name updated successfully");
                         addCategoryName();
@@ -832,7 +842,11 @@ public class Main extends JFrame {
                         updateCategoryList();
                         nameField.setText("");
                         newNameField.setText("");
-                    } else {
+                    }
+                    else if (duplicateCategory) {
+                        JOptionPane.showMessageDialog(redactCategoryNameFrame, "Category name already exists!");
+                    }
+                    else {
                         JOptionPane.showMessageDialog(redactCategoryNameFrame, "Category not found");
                         nameField.setText("");
                         newNameField.setText("");
@@ -971,13 +985,27 @@ public class Main extends JFrame {
                     String name = nameField.getText();
                     String newName = newNameField.getText();
                         Product productToUpdate = returnProductByName(name);
-                        if (productToUpdate != null) {
+                        boolean duplicate = false;
+                        for(Category c : categories) {
+                            for(Product p : c.getProducts()) {
+                                if (newName.equalsIgnoreCase(p.getName())) {
+                                    duplicate = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (productToUpdate != null && !duplicate) {
                             updateProductData(productToUpdate, returnCategoryByProduct(productToUpdate), newName, productToUpdate.getDescription(), productToUpdate.getProducer(), productToUpdate.getAmountInStock(), productToUpdate.getPrice());
                             refreshGoodsTable();
                             JOptionPane.showMessageDialog(redactProductFrame, "Product name updated successfully");
-                        } else {
+                        }
+                        else if (duplicate) {
+                            JOptionPane.showMessageDialog(redactProductFrame, "Product already exists!");
+                        }
+                        else {
                             JOptionPane.showMessageDialog(redactProductFrame, "Product not found");
                         }
+
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(redactNameFrame, "Error: " + ex.getMessage());
                 }
@@ -1212,7 +1240,10 @@ public class Main extends JFrame {
                         JOptionPane.showMessageDialog(writeOffAmountFrame,  AmountToWriteOff + " units of the Product have been written off.");
                     } else if (AmountToWriteOff == 0) {
                         JOptionPane.showMessageDialog(writeOffAmountFrame, "Amount not updated");
-                    } else {
+                    }
+                    else if (AmountToWriteOff < 0){
+                        JOptionPane.showMessageDialog(writeOffAmountFrame, "Cannot write-off negative amount!");
+                    }else {
                         JOptionPane.showMessageDialog(writeOffAmountFrame, "Product not found");
                     }
 
